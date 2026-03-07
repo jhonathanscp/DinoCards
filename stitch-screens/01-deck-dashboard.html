@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Deck Management</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#60a5fa",
+                        "background-light": "#f8fafc",
+                        "background-dark": "#09090b", // zinc-950
+                        "surface-light": "#ffffff",
+                        "surface-dark": "#18181b", // zinc-900
+                        "text-main-light": "#0f172a",
+                        "text-main-dark": "#e4e4e7", // zinc-200
+                        "text-muted-light": "#64748b",
+                        "text-muted-dark": "#a1a1aa", // zinc-400
+                        "border-light": "#e2e8f0",
+                        "border-dark": "#27272a", // zinc-800
+                        "new": "#60a5fa",
+                        "learning": "#f87171",
+                        "due": "#4ade80",
+                    },
+                    fontFamily: {
+                        display: ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.75rem",
+                    },
+                },
+            },
+        };
+    </script>
+<style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-text-main-light dark:text-text-main-dark min-h-screen flex flex-col">
+<header class="bg-background-light dark:bg-background-dark pt-14 pb-4 px-4 sticky top-0 z-10">
+<div class="max-w-md mx-auto">
+<h1 class="text-3xl font-bold tracking-tight">Decks</h1>
+</div>
+</header>
+<main class="flex-1 overflow-y-auto px-4 pb-28">
+<div class="max-w-md mx-auto space-y-4">
+<div class="flex px-4 py-2 text-xs font-semibold text-text-muted-light dark:text-text-muted-dark border-b border-border-light dark:border-border-dark">
+<div class="flex-1">Deck</div>
+<div class="flex space-x-4 text-right w-32 justify-end">
+<div class="w-8 text-center" title="New Cards">New</div>
+<div class="w-8 text-center" title="Learning Cards">Lrn</div>
+<div class="w-8 text-center" title="Due Cards">Due</div>
+</div>
+</div>
+<div class="bg-surface-light dark:bg-surface-dark rounded shadow-sm border border-border-light dark:border-border-dark overflow-hidden">
+<button class="w-full flex items-center px-4 py-3 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors border-b border-border-light dark:border-border-dark last:border-0 focus:outline-none">
+<div class="flex items-center flex-1 text-left">
+<span class="material-icons text-sm mr-2 text-text-muted-light dark:text-text-muted-dark transition-transform">add</span>
+<span class="font-medium text-sm">Geography</span>
+</div>
+<div class="flex space-x-4 text-right w-32 justify-end text-sm font-medium">
+<div class="w-8 text-center text-new">20</div>
+<div class="w-8 text-center text-text-muted-light dark:text-text-muted-dark opacity-50">0</div>
+<div class="w-8 text-center text-due">124</div>
+</div>
+</button>
+<div class="border-b border-border-light dark:border-border-dark last:border-0">
+<button class="w-full flex items-center px-4 py-3 bg-slate-50 dark:bg-zinc-800/50 transition-colors focus:outline-none">
+<div class="flex items-center flex-1 text-left">
+<span class="material-icons text-sm mr-2 text-text-muted-light dark:text-text-muted-dark">remove</span>
+<span class="font-medium text-sm">Languages</span>
+</div>
+<div class="flex space-x-4 text-right w-32 justify-end text-sm font-medium">
+<div class="w-8 text-center text-new">6</div>
+<div class="w-8 text-center text-learning">19</div>
+<div class="w-8 text-center text-due">73</div>
+</div>
+</button>
+<div class="bg-surface-light dark:bg-surface-dark">
+<button class="w-full flex items-center pl-10 pr-4 py-2 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors border-b border-border-light dark:border-border-dark last:border-0 focus:outline-none">
+<div class="flex-1 text-left text-sm text-text-muted-light dark:text-text-main-dark">
+                                English
+                            </div>
+<div class="flex space-x-4 text-right w-32 justify-end text-sm font-medium">
+<div class="w-8 text-center text-new">3</div>
+<div class="w-8 text-center text-learning">3</div>
+<div class="w-8 text-center text-due">35</div>
+</div>
+</button>
+<button class="w-full flex items-center pl-10 pr-4 py-2 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors border-b border-border-light dark:border-border-dark last:border-0 focus:outline-none">
+<div class="flex-1 text-left text-sm text-text-muted-light dark:text-text-main-dark">
+                                German
+                            </div>
+<div class="flex space-x-4 text-right w-32 justify-end text-sm font-medium">
+<div class="w-8 text-center text-new">3</div>
+<div class="w-8 text-center text-learning">6</div>
+<div class="w-8 text-center text-due">18</div>
+</div>
+</button>
+<button class="w-full flex items-center pl-10 pr-4 py-2 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors border-b border-border-light dark:border-border-dark last:border-0 focus:outline-none">
+<div class="flex items-center flex-1 text-left text-sm text-text-muted-light dark:text-text-main-dark">
+<span class="material-icons text-xs mr-2 transition-transform">add</span>
+                                Spanish
+                            </div>
+<div class="flex space-x-4 text-right w-32 justify-end text-sm font-medium">
+<div class="w-8 text-center text-text-muted-light dark:text-text-muted-dark opacity-50">0</div>
+<div class="w-8 text-center text-learning">10</div>
+<div class="w-8 text-center text-due">20</div>
+</div>
+</button>
+</div>
+</div>
+<button class="w-full flex items-center px-4 py-3 bg-blue-50 dark:bg-zinc-800/80 transition-colors border-b border-border-light dark:border-border-dark last:border-0 focus:outline-none group">
+<div class="flex items-center flex-1 text-left">
+<span class="material-icons text-sm mr-2 text-transparent group-hover:text-text-muted-light dark:group-hover:text-text-muted-dark transition-colors">circle</span>
+<span class="font-medium text-sm text-primary">My Deck</span>
+<span class="material-icons text-sm ml-2 text-text-muted-light dark:text-text-muted-dark opacity-0 group-hover:opacity-100 transition-opacity">settings</span>
+</div>
+<div class="flex space-x-4 text-right w-32 justify-end text-sm font-medium">
+<div class="w-8 text-center text-new">3</div>
+<div class="w-8 text-center text-learning">5</div>
+<div class="w-8 text-center text-due">42</div>
+</div>
+</button>
+<button class="w-full flex items-center px-4 py-3 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors border-b border-border-light dark:border-border-dark last:border-0 focus:outline-none">
+<div class="flex items-center flex-1 text-left">
+<span class="material-icons text-sm mr-2 text-text-muted-light dark:text-text-muted-dark transition-transform">add</span>
+<span class="font-medium text-sm">Other</span>
+</div>
+<div class="flex space-x-4 text-right w-32 justify-end text-sm font-medium">
+<div class="w-8 text-center text-text-muted-light dark:text-text-muted-dark opacity-50">0</div>
+<div class="w-8 text-center text-learning">11</div>
+<div class="w-8 text-center text-due">100</div>
+</div>
+</button>
+</div>
+<p class="text-xs text-text-muted-light dark:text-text-muted-dark text-center mt-8">
+                Studied 0 cards in 0 seconds today (0s/card)
+            </p>
+</div>
+</main>
+<nav class="bg-surface-light dark:bg-background-dark border-t border-border-light dark:border-border-dark fixed bottom-0 w-full z-20 pb-8 pt-3 px-2">
+<div class="flex justify-around items-center max-w-md mx-auto">
+<button class="flex flex-col items-center text-primary w-14">
+<span class="material-icons text-2xl">view_agenda</span>
+<span class="text-[10px] font-medium mt-1">Decks</span>
+</button>
+<button class="flex flex-col items-center text-text-muted-light dark:text-text-muted-dark hover:text-primary transition-colors w-14">
+<span class="material-icons text-2xl">add_circle</span>
+<span class="text-[10px] font-medium mt-1">Add</span>
+</button>
+<button class="flex flex-col items-center text-text-muted-light dark:text-text-muted-dark hover:text-primary transition-colors w-14">
+<span class="material-icons text-2xl">search</span>
+<span class="text-[10px] font-medium mt-1">Browse</span>
+</button>
+<button class="flex flex-col items-center text-text-muted-light dark:text-text-muted-dark hover:text-primary transition-colors w-14">
+<span class="material-icons text-2xl">bar_chart</span>
+<span class="text-[10px] font-medium mt-1">Stats</span>
+</button>
+<button class="flex flex-col items-center text-text-muted-light dark:text-text-muted-dark hover:text-primary transition-colors w-14">
+<span class="material-icons text-2xl">sync</span>
+<span class="text-[10px] font-medium mt-1">Sync</span>
+</button>
+<button class="flex flex-col items-center text-text-muted-light dark:text-text-muted-dark hover:text-primary transition-colors w-14">
+<span class="material-icons text-2xl">settings</span>
+<span class="text-[10px] font-medium mt-1">Settings</span>
+</button>
+</div>
+</nav>
+
+</body></html>

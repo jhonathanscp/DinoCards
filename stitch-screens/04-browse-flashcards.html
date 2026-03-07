@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Browse Flashcards Dark Mode Final</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ec5b",
+                        "background-light": "#f6f8f6",
+                        "background-dark": "#102216",
+                        "zinc-950": "#09090b",
+                        "zinc-900": "#18181b",
+                        "zinc-800": "#27272a",
+                        "zinc-400": "#a1a1aa",
+                        "zinc-300": "#d4d4d8",
+                        "zinc-200": "#e4e4e7"
+                    },
+                    fontFamily: {
+                        "display": ["Lexend"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 flex justify-center">
+<div class="relative flex min-h-screen w-full max-w-md flex-col bg-zinc-950 dark:bg-zinc-950 overflow-x-hidden pb-16">
+<!-- Header -->
+<div class="flex items-center px-4 py-4 justify-between sticky top-0 bg-zinc-950/90 backdrop-blur-md z-10 border-b border-zinc-900">
+<div class="flex size-10 shrink-0 items-center justify-center text-zinc-300">
+<span class="material-symbols-outlined text-2xl">arrow_back</span>
+</div>
+<h2 class="text-zinc-200 text-lg font-bold leading-tight tracking-tight flex-1 text-center">Browse Cards</h2>
+<div class="flex size-10 items-center justify-center">
+<button class="flex items-center justify-center rounded-lg text-primary">
+<span class="material-symbols-outlined text-2xl">add</span>
+</button>
+</div>
+</div>
+<!-- Search Bar -->
+<div class="px-4 py-3">
+<label class="flex flex-col w-full h-11">
+<div class="flex w-full flex-1 items-stretch rounded-lg bg-zinc-900 overflow-hidden border border-zinc-800 focus-within:border-primary/50 transition-colors">
+<div class="flex items-center justify-center pl-3 text-zinc-400">
+<span class="material-symbols-outlined text-xl">search</span>
+</div>
+<input class="w-full bg-transparent border-none focus:ring-0 text-zinc-200 placeholder:text-zinc-500 px-3 text-sm font-medium" placeholder="Search flashcards..." value=""/>
+</div>
+</label>
+</div>
+<!-- Filters -->
+<div class="flex gap-2 px-4 pb-4 overflow-x-auto no-scrollbar">
+<button class="flex h-8 shrink-0 items-center justify-center rounded-full bg-primary/20 border border-primary/30 px-4 text-primary text-sm font-medium transition-colors">All</button>
+<button class="flex h-8 shrink-0 items-center justify-center rounded-full bg-zinc-900 border border-zinc-800 px-4 text-zinc-300 text-sm font-medium hover:bg-zinc-800 transition-colors">Due</button>
+<button class="flex h-8 shrink-0 items-center justify-center rounded-full bg-zinc-900 border border-zinc-800 px-4 text-zinc-300 text-sm font-medium hover:bg-zinc-800 transition-colors">Learning</button>
+<button class="flex h-8 shrink-0 items-center justify-center rounded-full bg-zinc-900 border border-zinc-800 px-4 text-zinc-300 text-sm font-medium hover:bg-zinc-800 transition-colors">Tags</button>
+</div>
+<!-- Flashcard List -->
+<div class="flex flex-col px-4 gap-2">
+<!-- Normal Row -->
+<div class="flex items-center justify-between bg-zinc-900 rounded-xl p-4 border border-zinc-800/50 hover:border-zinc-700 transition-colors group">
+<div class="flex flex-col gap-1">
+<p class="text-zinc-200 text-base font-medium">Mitochondria</p>
+<div class="flex items-center gap-2">
+<span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20">Biology</span>
+<span class="text-zinc-500 text-xs">Due tomorrow</span>
+</div>
+</div>
+<div class="text-zinc-500 opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-xl">chevron_right</span>
+</div>
+</div>
+<!-- Swiped Row (Simulated) -->
+<div class="relative flex items-center bg-zinc-900 rounded-xl overflow-hidden border border-zinc-800/50">
+<div class="flex-1 p-4 -translate-x-24 transition-transform flex flex-col gap-1">
+<p class="text-zinc-200 text-base font-medium">Capital of France</p>
+<div class="flex items-center gap-2">
+<span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-blue-500/10 text-blue-400 border border-blue-500/20">Geography</span>
+<span class="text-zinc-500 text-xs">Reviewing</span>
+</div>
+</div>
+<div class="absolute right-0 top-0 bottom-0 flex">
+<button class="flex items-center justify-center w-12 bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors">
+<span class="material-symbols-outlined text-xl">edit</span>
+</button>
+<button class="flex items-center justify-center w-12 bg-red-500/20 text-red-500 hover:bg-red-500/30 transition-colors">
+<span class="material-symbols-outlined text-xl">delete</span>
+</button>
+</div>
+</div>
+<div class="flex items-center justify-between bg-zinc-900 rounded-xl p-4 border border-zinc-800/50 hover:border-zinc-700 transition-colors group">
+<div class="flex flex-col gap-1">
+<p class="text-zinc-200 text-base font-medium">O(n log n)</p>
+<div class="flex items-center gap-2">
+<span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-purple-500/10 text-purple-400 border border-purple-500/20">CS</span>
+<span class="text-zinc-500 text-xs">New</span>
+</div>
+</div>
+<div class="text-zinc-500 opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-xl">chevron_right</span>
+</div>
+</div>
+<div class="flex items-center justify-between bg-zinc-900 rounded-xl p-4 border border-zinc-800/50 hover:border-zinc-700 transition-colors group">
+<div class="flex flex-col gap-1">
+<p class="text-zinc-200 text-base font-medium">H2O</p>
+<div class="flex items-center gap-2">
+<span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20">Chemistry</span>
+<span class="text-zinc-500 text-xs">Due today</span>
+</div>
+</div>
+<div class="text-zinc-500 opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-xl">chevron_right</span>
+</div>
+</div>
+<div class="flex items-center justify-between bg-zinc-900 rounded-xl p-4 border border-zinc-800/50 hover:border-zinc-700 transition-colors group">
+<div class="flex flex-col gap-1">
+<p class="text-zinc-200 text-base font-medium">Photosynthesis</p>
+<div class="flex items-center gap-2">
+<span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20">Biology</span>
+<span class="text-zinc-500 text-xs">Learning</span>
+</div>
+</div>
+<div class="text-zinc-500 opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-xl">chevron_right</span>
+</div>
+</div>
+</div>
+<!-- Bottom Navigation Bar -->
+<div class="fixed bottom-0 w-full max-w-md bg-zinc-950/95 backdrop-blur-xl border-t border-zinc-900 pb-safe">
+<div class="flex px-2 py-2">
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-zinc-500 hover:text-zinc-300 transition-colors py-2" href="#">
+<span class="material-symbols-outlined text-[24px]">layers</span>
+<span class="text-[10px] font-semibold tracking-wide uppercase">Decks</span>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-primary py-2" href="#">
+<span class="material-symbols-outlined text-[24px] font-variation-settings-'FILL'1">search</span>
+<span class="text-[10px] font-semibold tracking-wide uppercase">Browse</span>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-zinc-500 hover:text-zinc-300 transition-colors py-2" href="#">
+<span class="material-symbols-outlined text-[24px]">add_circle</span>
+<span class="text-[10px] font-semibold tracking-wide uppercase">Add</span>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-zinc-500 hover:text-zinc-300 transition-colors py-2" href="#">
+<span class="material-symbols-outlined text-[24px]">person</span>
+<span class="text-[10px] font-semibold tracking-wide uppercase">Profile</span>
+</a>
+</div>
+</div>
+</div>
+</body></html>

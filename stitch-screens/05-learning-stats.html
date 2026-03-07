@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Learning Statistics</title>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ec5b",
+                        "background-light": "#f6f8f6",
+                        "background-dark": "#102216",
+                    },
+                    fontFamily: {
+                        "display": ["Lexend", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-display bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen flex flex-col">
+<!-- Header -->
+<header class="flex items-center p-4 pb-2 justify-between sticky top-0 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md z-10 border-b border-primary/10">
+<button class="flex size-12 shrink-0 items-center justify-center text-slate-700 dark:text-slate-300 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-2xl">arrow_back</span>
+</button>
+<h2 class="text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center pr-12">Learning Statistics</h2>
+</header>
+<!-- Main Content -->
+<main class="flex-1 overflow-y-auto pb-24">
+<!-- Summary Stats -->
+<section class="flex flex-wrap gap-3 px-4 py-4">
+<div class="flex min-w-[111px] flex-1 basis-[fit-content] flex-col gap-2 rounded-xl border border-primary/20 bg-primary/5 p-4 items-center text-center shadow-sm">
+<p class="tracking-light text-3xl font-bold leading-tight text-primary">12</p>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-orange-500">local_fire_department</span>
+<p class="text-slate-600 dark:text-slate-400 text-sm font-medium">Daily Streak</p>
+</div>
+</div>
+<div class="flex min-w-[111px] flex-1 basis-[fit-content] flex-col gap-2 rounded-xl border border-primary/20 bg-primary/5 p-4 items-center text-center shadow-sm">
+<p class="tracking-light text-3xl font-bold leading-tight text-primary">45</p>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-blue-500">style</span>
+<p class="text-slate-600 dark:text-slate-400 text-sm font-medium">Cards Studied</p>
+</div>
+</div>
+</section>
+<!-- Predicted Reviews Line Chart -->
+<section class="px-4 py-4">
+<div class="rounded-xl border border-primary/10 bg-background-light dark:bg-slate-900/50 p-5 shadow-sm">
+<div class="flex flex-col gap-1 mb-6">
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium uppercase tracking-wider">Predicted Reviews</p>
+<div class="flex items-baseline gap-3">
+<p class="text-[32px] font-bold leading-tight">150</p>
+<p class="text-primary text-sm font-semibold bg-primary/10 px-2 py-1 rounded-md">+10% <span class="text-slate-500 dark:text-slate-400 font-normal">vs last week</span></p>
+</div>
+</div>
+<div class="flex min-h-[160px] flex-col gap-4 relative">
+<!-- Chart SVG -->
+<svg class="w-full h-[140px] drop-shadow-md" fill="none" preserveaspectratio="none" viewbox="0 0 400 140" xmlns="http://www.w3.org/2000/svg">
+<!-- Grid Lines -->
+<line stroke="currentColor" stroke-dasharray="4 4" stroke-opacity="0.1" x1="0" x2="400" y1="20" y2="20"></line>
+<line stroke="currentColor" stroke-dasharray="4 4" stroke-opacity="0.1" x1="0" x2="400" y1="60" y2="60"></line>
+<line stroke="currentColor" stroke-dasharray="4 4" stroke-opacity="0.1" x1="0" x2="400" y1="100" y2="100"></line>
+<!-- Area Fill -->
+<path d="M0 90 C 40 90, 60 40, 100 40 C 140 40, 160 80, 200 80 C 240 80, 260 30, 300 30 C 340 30, 360 110, 400 110 L 400 140 L 0 140 Z" fill="url(#chart-gradient)"></path>
+<!-- Line -->
+<path d="M0 90 C 40 90, 60 40, 100 40 C 140 40, 160 80, 200 80 C 240 80, 260 30, 300 30 C 340 30, 360 110, 400 110" stroke="#13ec5b" stroke-linecap="round" stroke-linejoin="round" stroke-width="3"></path>
+<!-- Data Points -->
+<circle cx="100" cy="40" fill="#102216" r="4" stroke="#13ec5b" stroke-width="2"></circle>
+<circle cx="200" cy="80" fill="#102216" r="4" stroke="#13ec5b" stroke-width="2"></circle>
+<circle cx="300" cy="30" fill="#102216" r="4" stroke="#13ec5b" stroke-width="2"></circle>
+<defs>
+<lineargradient gradientunits="userSpaceOnUse" id="chart-gradient" x1="0" x2="0" y1="0" y2="140">
+<stop offset="0%" stop-color="#13ec5b" stop-opacity="0.3"></stop>
+<stop offset="100%" stop-color="#13ec5b" stop-opacity="0.0"></stop>
+</lineargradient>
+</defs>
+</svg>
+<!-- X-Axis Labels -->
+<div class="flex justify-between text-slate-500 dark:text-slate-400 text-xs font-medium px-2 mt-2">
+<span>Mon</span>
+<span>Tue</span>
+<span>Wed</span>
+<span>Thu</span>
+<span>Fri</span>
+<span>Sat</span>
+<span>Sun</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Activity Heatmap -->
+<section class="px-4 py-4">
+<div class="rounded-xl border border-primary/10 bg-background-light dark:bg-slate-900/50 p-5 shadow-sm">
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium uppercase tracking-wider mb-4">Study Activity</p>
+<div class="flex justify-between items-end gap-2 overflow-x-auto pb-2 scrollbar-hide">
+<!-- Generating a simple heatmap grid representation -->
+<!-- Weeks (Columns) -->
+<div class="flex flex-col gap-1.5">
+<div class="w-3.5 h-3.5 rounded-sm bg-primary/20"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-primary/40"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-primary/80"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-primary"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-primary/60"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-slate-200 dark:bg-slate-800"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-primary/20"></div>
+</div>
+<div class="flex flex-col gap-1.5">
+<div class="w-3.5 h-3.5 rounded-sm bg-slate-200 dark:bg-slate-800"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-primary/40"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-primary/20"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-slate-200 dark:bg-slate-800"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-primary"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-primary/80"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-primary/40"></div>
+</div>
+<div class="flex flex-col gap-1.5">
+<div class="w-3.5 h-3.5 rounded-sm bg-primary/60"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-primary"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-primary/80"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-primary/40"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-slate-200 dark:bg-slate-800"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-primary/20"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-slate-200 dark:bg-slate-800"></div>
+</div>
+<div class="flex flex-col gap-1.5">
+<div class="w-3.5 h-3.5 rounded-sm bg-slate-200 dark:bg-slate-800"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-slate-200 dark:bg-slate-800"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-primary/20"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-primary/60"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-primary"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-primary/80"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-primary/40"></div>
+</div>
+<div class="flex flex-col gap-1.5">
+<div class="w-3.5 h-3.5 rounded-sm bg-primary/40"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-primary/60"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-slate-200 dark:bg-slate-800"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-slate-200 dark:bg-slate-800"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-primary/20"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-primary/40"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-primary"></div>
+</div>
+<div class="flex flex-col gap-1.5">
+<div class="w-3.5 h-3.5 rounded-sm bg-primary/80"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-primary"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-primary/60"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-primary/40"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-slate-200 dark:bg-slate-800"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-slate-200 dark:bg-slate-800"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-primary/20"></div>
+</div>
+<div class="flex flex-col gap-1.5">
+<div class="w-3.5 h-3.5 rounded-sm bg-slate-200 dark:bg-slate-800"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-primary/20"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-primary/40"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-primary/80"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-primary"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-primary/60"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-slate-200 dark:bg-slate-800"></div>
+</div>
+<div class="flex flex-col gap-1.5">
+<div class="w-3.5 h-3.5 rounded-sm bg-primary/20"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-slate-200 dark:bg-slate-800"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-primary/40"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-primary/60"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-primary"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-primary/80"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-primary/40"></div>
+</div>
+<div class="flex flex-col gap-1.5">
+<div class="w-3.5 h-3.5 rounded-sm bg-primary/60"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-primary"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-primary/80"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-slate-200 dark:bg-slate-800"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-primary/20"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-primary/40"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-slate-200 dark:bg-slate-800"></div>
+</div>
+<div class="flex flex-col gap-1.5">
+<div class="w-3.5 h-3.5 rounded-sm bg-slate-200 dark:bg-slate-800"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-primary/20"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-primary/40"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-primary/60"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-primary"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-primary/80"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-primary/40"></div>
+</div>
+</div>
+<div class="mt-4 flex items-center justify-end gap-2 text-xs text-slate-500 dark:text-slate-400">
+<span>Less</span>
+<div class="w-3 h-3 rounded-sm bg-slate-200 dark:bg-slate-800"></div>
+<div class="w-3 h-3 rounded-sm bg-primary/40"></div>
+<div class="w-3 h-3 rounded-sm bg-primary/80"></div>
+<div class="w-3 h-3 rounded-sm bg-primary"></div>
+<span>More</span>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 w-full flex gap-2 border-t border-primary/10 bg-background-light dark:bg-background-dark px-2 pb-6 pt-3 z-20">
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-500 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-2xl">home</span>
+<span class="text-[10px] font-medium">Home</span>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-500 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-2xl">search</span>
+<span class="text-[10px] font-medium">Search</span>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-500 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-3xl text-primary">add_circle</span>
+<span class="text-[10px] font-medium">Add</span>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-primary" href="#">
+<div class="relative">
+<span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 1;">bar_chart</span>
+<span class="absolute -top-1 -right-1 flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+</span>
+</div>
+<span class="text-[10px] font-medium">Stats</span>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-500 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-2xl">settings</span>
+<span class="text-[10px] font-medium">Settings</span>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-500 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-2xl">person</span>
+<span class="text-[10px] font-medium">Profile</span>
+</a>
+</nav>
+</body></html>
