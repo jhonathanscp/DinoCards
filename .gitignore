@@ -25,3 +25,9 @@ Thumbs.db
 /.agents
 composer.lock
 package-lock.json
+/dist
+/dist-electron
+/out
+/release
+/electron/node_modules
+/electron/package-lock.json

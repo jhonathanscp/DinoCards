@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getFlashcards } from '../services/localDb'
+import { getFlashcards, logReview } from '../services/localDb'
 
 export default function StudyPage() {
     const navigate = useNavigate()
@@ -31,14 +31,19 @@ export default function StudyPage() {
     const card = studyCards[currentIndex]
     const progress = ((currentIndex + 1) / totalCards) * 100
 
-    const handleAnswer = () => {
-        // Implement logic to invoke POST to Review API (or store locally)
-        // For step 9 validation we'll just progress the local state.
-        if (currentIndex < totalCards - 1) {
-            setCurrentIndex(currentIndex + 1)
-            setShowAnswer(false)
-        } else {
-            setCompleted(true)
+    const handleAnswer = async (grade) => {
+        try {
+            // Save the review log locally to be synchronized later
+            await logReview(card.id, grade)
+
+            if (currentIndex < totalCards - 1) {
+                setCurrentIndex(currentIndex + 1)
+                setShowAnswer(false)
+            } else {
+                setCompleted(true)
+            }
+        } catch (error) {
+            console.error("Failed to save review log", error)
         }
     }
 
@@ -138,19 +143,19 @@ export default function StudyPage() {
                 ) : (
                     <div className="flex items-center gap-2 w-full max-w-sm">
                         <button
-                            onClick={handleAnswer}
+                            onClick={() => handleAnswer(1)} // 1 = Again (Errei)
                             className="flex-1 px-2 py-4 rounded-lg bg-red-100 dark:bg-red-900/80 border border-red-200 dark:border-red-800/50 hover:bg-red-200 dark:hover:bg-red-800 text-red-700 dark:text-zinc-100 flex items-center justify-center shadow-lg transform active:scale-95 transition-all"
                         >
                             <span className="font-medium text-sm">Errei</span>
                         </button>
                         <button
-                            onClick={handleAnswer}
+                            onClick={() => handleAnswer(3)} // 3 = Good/Hard (Repetir)
                             className="flex-1 px-2 py-4 rounded-lg bg-amber-100 dark:bg-yellow-700/80 border border-amber-200 dark:border-yellow-600/50 hover:bg-amber-200 dark:hover:bg-yellow-600 text-amber-700 dark:text-zinc-100 flex items-center justify-center shadow-lg transform active:scale-95 transition-all"
                         >
                             <span className="font-medium text-sm">Repetir</span>
                         </button>
                         <button
-                            onClick={handleAnswer}
+                            onClick={() => handleAnswer(5)} // 5 = Easy (Acertei)
                             className="flex-1 px-2 py-4 rounded-lg bg-green-100 dark:bg-green-800/80 border border-green-200 dark:border-green-700/50 hover:bg-green-200 dark:hover:bg-green-700 text-green-700 dark:text-zinc-100 flex items-center justify-center shadow-lg transform active:scale-95 transition-all"
                         >
                             <span className="font-medium text-sm">Acertei</span>

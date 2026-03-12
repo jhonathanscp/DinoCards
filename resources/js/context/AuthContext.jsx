@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import axios from '../lib/axios';
+import { syncAll } from '../services/syncService';
 
 const AuthContext = createContext();
 
@@ -13,6 +14,15 @@ export const AuthProvider = ({ children }) => {
         try {
             const { data } = await axios.get('/api/user');
             setUser(data);
+            
+            // Wait for initial sync to finish before showing the app to the user
+            if (navigator.onLine) {
+                try {
+                    await syncAll();
+                } catch (syncError) {
+                    console.error("Initial sync failed but auth succeeded:", syncError);
+                }
+            }
         } catch (error) {
             setUser(null);
         } finally {

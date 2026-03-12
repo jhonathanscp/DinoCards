@@ -17,6 +17,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
         // Review Endpoint (SM-2 SRS)
         Route::post('/flashcards/{flashcard}/review', [ReviewController::class , 'store']);
-
     
 });
+
+Route::get('/ping', function () {
+    return 'pong'; });

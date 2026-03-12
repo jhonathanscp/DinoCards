@@ -2,8 +2,10 @@ import axios from '../lib/axios';
 import {
     getRawSubjects,
     getRawFlashcards,
+    getRawReviewLogs,
     saveRawSubject,
     saveRawFlashcard,
+    saveRawReviewLog,
     getSyncMetadata,
     saveSyncMetadata
 } from './localDb';
@@ -16,18 +18,21 @@ export const pushToServer = async () => {
     try {
         const localSubjects = await getRawSubjects();
         const localFlashcards = await getRawFlashcards();
+        const localReviewLogs = await getRawReviewLogs();
 
         // Filter only items that are not synced yet
         const unSyncedSubjects = localSubjects.filter(sub => !sub.is_synced);
         const unSyncedFlashcards = localFlashcards.filter(card => !card.is_synced);
+        const unSyncedReviewLogs = localReviewLogs.filter(log => !log.is_synced);
 
-        if (unSyncedSubjects.length === 0 && unSyncedFlashcards.length === 0) {
+        if (unSyncedSubjects.length === 0 && unSyncedFlashcards.length === 0 && unSyncedReviewLogs.length === 0) {
             return; // Nothing to push
         }
 
         const payload = {
             subjects: unSyncedSubjects,
-            flashcards: unSyncedFlashcards
+            flashcards: unSyncedFlashcards,
+            review_logs: unSyncedReviewLogs
         };
 
         const response = await axios.post('/api/sync/push', payload);
@@ -42,6 +47,10 @@ export const pushToServer = async () => {
                 card.is_synced = true;
                 await saveRawFlashcard(card);
             }
+            for (const log of unSyncedReviewLogs) {
+                log.is_synced = true;
+                await saveRawReviewLog(log);
+            }
         }
     } catch (error) {
         console.error('Error during push sync:', error);
@@ -51,7 +60,7 @@ export const pushToServer = async () => {
 
 /**
  * Pulls changes from the server that occurred after `last_pulled_at`.
- * Merges the incoming subjects and flashcards into the local IndexedDB.
+ * Merges the incoming subjects, flashcards, and review logs into the local IndexedDB.
  */
 export const pullFromServer = async () => {
     try {
@@ -61,14 +70,11 @@ export const pullFromServer = async () => {
             : '/api/sync/pull';
 
         const response = await axios.get(url);
-        const { subjects, flashcards, timestamp } = response.data;
+        const { subjects, flashcards, review_logs, timestamp } = response.data;
 
         // Merge Subjects
         if (subjects && subjects.length > 0) {
             for (const serverSub of subjects) {
-                // For the offline engine, we just overwrite the local copy with the server copy
-                // because the server is the source of truth for pulls.
-                // It also brings down SoftDeletes (deleted_at != null)
                 serverSub.is_synced = true;
                 await saveRawSubject(serverSub);
             }
@@ -79,6 +85,14 @@ export const pullFromServer = async () => {
             for (const serverCard of flashcards) {
                 serverCard.is_synced = true;
                 await saveRawFlashcard(serverCard);
+            }
+        }
+
+        // Merge Review Logs
+        if (review_logs && review_logs.length > 0) {
+            for (const serverLog of review_logs) {
+                serverLog.is_synced = true;
+                await saveRawReviewLog(serverLog);
             }
         }
 
@@ -106,3 +120,17 @@ export const syncAll = async () => {
         throw error;
     }
 };
+
+/**
+ * Utility for debounced pushing (useful for auto-syncing during typing/studying)
+ */
+let debounceTimer;
+export const debouncedPushToServer = () => {
+    if (debounceTimer) clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+        if (navigator.onLine) {
+            pushToServer().catch(e => console.error("Auto-sync push failed", e));
+        }
+    }, 2000); // 2 seconds debounce
+};
+

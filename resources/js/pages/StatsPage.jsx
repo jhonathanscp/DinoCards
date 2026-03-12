@@ -1,148 +1,282 @@
+import { useState, useEffect } from 'react'
+import { getFlashcards, getReviewLogs } from '../services/localDb'
+
 export default function StatsPage() {
-    // Heatmap data (1 = lowest, 4 = highest, 0 = none)
-    const heatmapData = [
-        [1, 2, 4, 4, 3, 0, 1],
-        [0, 2, 1, 0, 4, 4, 2],
-        [3, 4, 4, 2, 0, 1, 0],
-        [0, 0, 1, 3, 4, 4, 2],
-        [2, 3, 0, 0, 1, 2, 4],
-        [4, 4, 3, 2, 0, 0, 1],
-        [0, 1, 2, 4, 4, 3, 0],
-        [1, 0, 2, 3, 4, 4, 2],
-        [3, 4, 4, 0, 1, 2, 0],
-        [0, 1, 2, 3, 4, 4, 2],
-    ]
+    const [stats, setStats] = useState({
+        total: 0,
+        newCards: 0,
+        learning: 0,
+        review: 0,
+        cardsStudiedToday: 0,
+        dailyStreak: 0
+    })
+    const [heatmapData, setHeatmapData] = useState([])
+    const [isLoading, setIsLoading] = useState(true)
+
+    useEffect(() => {
+        const fetchStats = async () => {
+            try {
+                const [cards, logs] = await Promise.all([
+                    getFlashcards(),
+                    getReviewLogs()
+                ])
+
+                // Collection Breakdown
+                let newCards = 0
+                let learning = 0
+                let review = 0
+
+                cards.forEach(card => {
+                    if (card.repetitions === 0) {
+                        newCards++
+                    } else if (card.interval < 1) {
+                        learning++
+                    } else {
+                        review++
+                    }
+                })
+
+                // Generate Heatmap (Last 10 weeks)
+                const WEEKS = 10;
+                const DAYS_IN_WEEK = 7;
+                const msPerDay = 24 * 60 * 60 * 1000;
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+
+                // Initialize empty heatmap array
+                const newHeatmapData = Array(WEEKS).fill(null).map(() => Array(DAYS_IN_WEEK).fill(0));
+
+                // Group logs by date
+                const logsByDate = {};
+                let cardsStudiedToday = 0;
+
+                logs.forEach(log => {
+                    const logDate = new Date(log.reviewed_at);
+                    logDate.setHours(0, 0, 0, 0);
+                    const dateStr = logDate.toISOString().split('T')[0];
+
+                    if (!logsByDate[dateStr]) {
+                        logsByDate[dateStr] = 0;
+                    }
+                    logsByDate[dateStr]++;
+
+                    if (logDate.getTime() === today.getTime()) {
+                        cardsStudiedToday++;
+                    }
+                });
+
+                // Calculate Streak
+                let streak = 0;
+                let currentCheckDate = new Date(today);
+
+                while (true) {
+                    const dateStr = currentCheckDate.toISOString().split('T')[0];
+                    if (logsByDate[dateStr] && logsByDate[dateStr] > 0) {
+                        streak++;
+                        currentCheckDate.setDate(currentCheckDate.getDate() - 1);
+                    } else if (streak === 0 && currentCheckDate.getTime() === today.getTime()) {
+                        // It's today and we haven't studied yet, check yesterday before breaking
+                        currentCheckDate.setDate(currentCheckDate.getDate() - 1);
+                    } else {
+                        break;
+                    }
+                }
+
+                // Fill Heatmap Data
+                let maxReviewsInDay = 1;
+                Object.values(logsByDate).forEach(val => {
+                    if (val > maxReviewsInDay) maxReviewsInDay = val;
+                });
+
+                // Get the day of the week for today (0 = Sunday, 6 = Saturday)
+                // Shift to make Monday = 0
+                let currentDayOfWeek = (today.getDay() + 6) % 7;
+
+                let dayOffset = 0;
+                for (let week = WEEKS - 1; week >= 0; week--) {
+                    for (let day = DAYS_IN_WEEK - 1; day >= 0; day--) {
+                        // Skip future days in the current week
+                        if (week === WEEKS - 1 && day > currentDayOfWeek) {
+                            newHeatmapData[week][day] = -1; // -1 means empty space (future)
+                            continue;
+                        }
+
+                        const cellDate = new Date(today.getTime() - (dayOffset * msPerDay));
+                        const dateStr = cellDate.toISOString().split('T')[0];
+
+                        const reviews = logsByDate[dateStr] || 0;
+
+                        let level = 0;
+                        if (reviews > 0) {
+                            const ratio = reviews / maxReviewsInDay;
+                            if (ratio <= 0.25) level = 1;
+                            else if (ratio <= 0.5) level = 2;
+                            else if (ratio <= 0.75) level = 3;
+                            else level = 4;
+                        }
+
+                        newHeatmapData[week][day] = level;
+                        dayOffset++;
+                    }
+                }
+
+                setHeatmapData(newHeatmapData);
+                setStats({
+                    total: cards.length,
+                    newCards,
+                    learning,
+                    review,
+                    cardsStudiedToday,
+                    dailyStreak: streak
+                })
+            } catch (error) {
+                console.error("Failed to load stats", error)
+            } finally {
+                setIsLoading(false)
+            }
+        }
+
+        fetchStats()
+    }, [])
 
     const heatmapColors = {
-        0: 'bg-slate-200 dark:bg-zinc-800',
-        1: 'bg-primary/20',
-        2: 'bg-primary/40',
-        3: 'bg-primary/80',
-        4: 'bg-primary',
+        [-1]: 'bg-transparent', // Future days
+        0: 'bg-slate-200 dark:bg-zinc-800', // No activity
+        1: 'bg-primary/20', // Level 1
+        2: 'bg-primary/40', // Level 2
+        3: 'bg-primary/80', // Level 3
+        4: 'bg-primary',    // Level 4 max
     }
 
     return (
-        <div className="flex flex-col max-w-md mx-auto w-full">
+        <div className="flex flex-col max-w-md mx-auto w-full pb-24">
             {/* Header */}
             <header className="flex items-center p-4 pb-2 justify-between sticky top-0 bg-slate-100/80 dark:bg-background-dark/80 backdrop-blur-md z-10 border-b border-slate-200 dark:border-primary/10 transition-colors">
-                <button className="flex size-12 shrink-0 items-center justify-center text-slate-500 dark:text-zinc-300 hover:text-primary transition-colors">
+                <button className="flex size-12 shrink-0 items-center justify-center text-slate-500 dark:text-zinc-300 hover:text-primary transition-colors" onClick={() => window.history.back()}>
                     <span className="material-symbols-outlined text-2xl">arrow_back</span>
                 </button>
-                <h2 className="text-lg font-bold leading-tight tracking-tight flex-1 text-center pr-12">
-                    Learning Statistics
+                <h2 className="text-lg font-bold leading-tight tracking-tight flex-1 text-center pr-12 text-slate-900 dark:text-zinc-200">
+                    Statistics
                 </h2>
             </header>
 
-            {/* Summary Stats */}
-            <section className="flex flex-wrap gap-3 px-4 py-4">
-                <div className="flex min-w-[111px] flex-1 basis-[fit-content] flex-col gap-2 rounded-xl border border-primary/20 bg-primary/5 p-4 items-center text-center shadow-sm">
-                    <p className="tracking-tight text-3xl font-bold leading-tight text-primary">12</p>
-                    <div className="flex items-center gap-2">
-                        <span className="material-symbols-outlined text-sm text-orange-500">local_fire_department</span>
-                        <p className="text-slate-500 dark:text-zinc-400 text-sm font-medium">Daily Streak</p>
-                    </div>
+            {isLoading ? (
+                <div className="flex items-center justify-center h-48 text-slate-400">
+                    Calculating metrics...
                 </div>
-                <div className="flex min-w-[111px] flex-1 basis-[fit-content] flex-col gap-2 rounded-xl border border-primary/20 bg-primary/5 p-4 items-center text-center shadow-sm">
-                    <p className="tracking-tight text-3xl font-bold leading-tight text-primary">45</p>
-                    <div className="flex items-center gap-2">
-                        <span className="material-symbols-outlined text-sm text-blue-500">style</span>
-                        <p className="text-slate-500 dark:text-zinc-400 text-sm font-medium">Cards Studied</p>
-                    </div>
-                </div>
-            </section>
-
-            {/* Predicted Reviews Chart */}
-            <section className="px-4 py-4">
-                <div className="rounded-xl border border-slate-200 dark:border-primary/10 bg-white dark:bg-zinc-900/50 p-5 shadow-sm transition-colors">
-                    <div className="flex flex-col gap-1 mb-6">
-                        <p className="text-slate-500 dark:text-zinc-400 text-sm font-medium uppercase tracking-wider">
-                            Predicted Reviews
-                        </p>
-                        <div className="flex items-baseline gap-3">
-                            <p className="text-[32px] font-bold leading-tight">150</p>
-                            <p className="text-primary text-sm font-semibold bg-primary/10 px-2 py-1 rounded-md">
-                                +10% <span className="text-slate-400 dark:text-zinc-400 font-normal">vs last week</span>
-                            </p>
-                        </div>
-                    </div>
-                    <div className="flex min-h-[160px] flex-col gap-4 relative">
-                        <svg
-                            className="w-full h-[140px] drop-shadow-md"
-                            fill="none"
-                            preserveAspectRatio="none"
-                            viewBox="0 0 400 140"
-                            xmlns="http://www.w3.org/2000/svg"
-                        >
-                            {/* Grid Lines */}
-                            <line stroke="currentColor" strokeDasharray="4 4" strokeOpacity="0.1" x1="0" x2="400" y1="20" y2="20" />
-                            <line stroke="currentColor" strokeDasharray="4 4" strokeOpacity="0.1" x1="0" x2="400" y1="60" y2="60" />
-                            <line stroke="currentColor" strokeDasharray="4 4" strokeOpacity="0.1" x1="0" x2="400" y1="100" y2="100" />
-                            {/* Area Fill */}
-                            <path
-                                d="M0 90 C 40 90, 60 40, 100 40 C 140 40, 160 80, 200 80 C 240 80, 260 30, 300 30 C 340 30, 360 110, 400 110 L 400 140 L 0 140 Z"
-                                fill="url(#chart-gradient)"
-                            />
-                            {/* Line */}
-                            <path
-                                d="M0 90 C 40 90, 60 40, 100 40 C 140 40, 160 80, 200 80 C 240 80, 260 30, 300 30 C 340 30, 360 110, 400 110"
-                                stroke="#60a5fa"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="3"
-                            />
-                            {/* Data Points */}
-                            <circle cx="100" cy="40" fill="currentColor" className="text-white dark:text-[#09090b]" r="4" stroke="#60a5fa" strokeWidth="2" />
-                            <circle cx="200" cy="80" fill="currentColor" className="text-white dark:text-[#09090b]" r="4" stroke="#60a5fa" strokeWidth="2" />
-                            <circle cx="300" cy="30" fill="currentColor" className="text-white dark:text-[#09090b]" r="4" stroke="#60a5fa" strokeWidth="2" />
-                            <defs>
-                                <linearGradient gradientUnits="userSpaceOnUse" id="chart-gradient" x1="0" x2="0" y1="0" y2="140">
-                                    <stop offset="0%" stopColor="#60a5fa" stopOpacity="0.3" />
-                                    <stop offset="100%" stopColor="#60a5fa" stopOpacity="0.0" />
-                                </linearGradient>
-                            </defs>
-                        </svg>
-                        {/* X-Axis Labels */}
-                        <div className="flex justify-between text-slate-400 dark:text-zinc-400 text-xs font-medium px-2 mt-2">
-                            <span>Mon</span>
-                            <span>Tue</span>
-                            <span>Wed</span>
-                            <span>Thu</span>
-                            <span>Fri</span>
-                            <span>Sat</span>
-                            <span>Sun</span>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* Activity Heatmap */}
-            <section className="px-4 py-4">
-                <div className="rounded-xl border border-slate-200 dark:border-primary/10 bg-white dark:bg-zinc-900/50 p-5 shadow-sm transition-colors">
-                    <p className="text-slate-500 dark:text-zinc-400 text-sm font-medium uppercase tracking-wider mb-4">
-                        Study Activity
-                    </p>
-                    <div className="flex justify-between items-end gap-2 overflow-x-auto pb-2 no-scrollbar">
-                        {heatmapData.map((week, weekIdx) => (
-                            <div key={weekIdx} className="flex flex-col gap-1.5">
-                                {week.map((level, dayIdx) => (
-                                    <div
-                                        key={dayIdx}
-                                        className={`w-3.5 h-3.5 rounded-sm ${heatmapColors[level]}`}
-                                    />
-                                ))}
+            ) : (
+                <>
+                    {/* Summary Stats */}
+                    <section className="flex flex-wrap gap-3 px-4 py-4">
+                        <div className="flex min-w-[111px] flex-1 basis-[fit-content] flex-col gap-1 rounded-xl border border-primary/20 bg-primary/5 p-4 items-center text-center shadow-sm">
+                            <p className="tracking-tight text-3xl font-bold leading-tight text-primary">{stats.dailyStreak}</p>
+                            <div className="flex items-center gap-1.5">
+                                <span className="material-symbols-outlined text-sm text-orange-500">local_fire_department</span>
+                                <p className="text-slate-600 dark:text-zinc-400 text-sm font-medium">Daily Streak</p>
                             </div>
-                        ))}
-                    </div>
-                    <div className="mt-4 flex items-center justify-end gap-2 text-xs text-slate-400 dark:text-zinc-400">
-                        <span>Less</span>
-                        <div className="w-3 h-3 rounded-sm bg-slate-200 dark:bg-zinc-800" />
-                        <div className="w-3 h-3 rounded-sm bg-primary/40" />
-                        <div className="w-3 h-3 rounded-sm bg-primary/80" />
-                        <div className="w-3 h-3 rounded-sm bg-primary" />
-                        <span>More</span>
-                    </div>
-                </div>
-            </section>
+                        </div>
+                        <div className="flex min-w-[111px] flex-1 basis-[fit-content] flex-col gap-1 rounded-xl border border-primary/20 bg-primary/5 p-4 items-center text-center shadow-sm">
+                            <p className="tracking-tight text-3xl font-bold leading-tight text-primary">{stats.cardsStudiedToday}</p>
+                            <div className="flex items-center gap-1.5">
+                                <span className="material-symbols-outlined text-sm text-blue-500">style</span>
+                                <p className="text-slate-600 dark:text-zinc-400 text-sm font-medium">Cards Today</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Collection Breakdown */}
+                    <section className="px-4 py-2">
+                        <div className="rounded-xl border border-slate-200 dark:border-border-dark bg-white dark:bg-surface-dark p-5 shadow-sm transition-colors flex flex-col gap-4">
+                            <div className="flex items-center justify-between mb-2">
+                                <p className="text-slate-500 dark:text-zinc-400 text-sm font-bold uppercase tracking-wider">
+                                    Collection Breakdown
+                                </p>
+                                <span className="text-slate-400 dark:text-zinc-500 text-sm">{stats.total} total</span>
+                            </div>
+
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-3 h-3 rounded-full bg-blue-500" />
+                                    <span className="text-slate-700 dark:text-zinc-300 font-medium">New</span>
+                                </div>
+                                <span className="text-slate-900 dark:text-white font-bold">{stats.newCards}</span>
+                            </div>
+
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-3 h-3 rounded-full bg-orange-500" />
+                                    <span className="text-slate-700 dark:text-zinc-300 font-medium">Learning</span>
+                                </div>
+                                <span className="text-slate-900 dark:text-white font-bold">{stats.learning}</span>
+                            </div>
+
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-3 h-3 rounded-full bg-emerald-500" />
+                                    <span className="text-slate-700 dark:text-zinc-300 font-medium">To Review</span>
+                                </div>
+                                <span className="text-slate-900 dark:text-white font-bold">{stats.review}</span>
+                            </div>
+
+                            {/* Progress bar visual */}
+                            {stats.total > 0 && (
+                                <div className="w-full h-2 rounded-full flex overflow-hidden mt-2 bg-slate-100 dark:bg-zinc-800">
+                                    <div style={{ width: `${(stats.newCards / stats.total) * 100}%` }} className="bg-blue-500 h-full" />
+                                    <div style={{ width: `${(stats.learning / stats.total) * 100}%` }} className="bg-orange-500 h-full" />
+                                    <div style={{ width: `${(stats.review / stats.total) * 100}%` }} className="bg-emerald-500 h-full" />
+                                </div>
+                            )}
+                        </div>
+                    </section>
+
+                    {/* Activity Heatmap */}
+                    <section className="px-4 py-4">
+                        <div className="rounded-xl border border-slate-200 dark:border-border-dark bg-white dark:bg-surface-dark p-5 shadow-sm transition-colors">
+                            <p className="text-slate-500 dark:text-zinc-400 text-sm font-bold uppercase tracking-wider mb-4">
+                                Study Activity (Last 10 Weeks)
+                            </p>
+
+                            <div className="flex overflow-hidden">
+                                <div className="flex items-start">
+                                    {/* Labels for all 7 days */}
+                                    <div className="flex flex-col text-[11px] font-medium text-slate-400 dark:text-zinc-500 pr-1 gap-[4px] pt-[2px]">
+                                        <span className="h-[16px] leading-[16px]">Sun</span>
+                                        <span className="h-[16px] leading-[16px]">Mon</span>
+                                        <span className="h-[16px] leading-[16px]">Tue</span>
+                                        <span className="h-[16px] leading-[16px]">Wed</span>
+                                        <span className="h-[16px] leading-[16px]">Thu</span>
+                                        <span className="h-[16px] leading-[16px]">Fri</span>
+                                        <span className="h-[16px] leading-[16px]">Sat</span>
+                                    </div>
+
+                                    {/* The Heatmap Grid */}
+                                    <div className="flex gap-[4px] overflow-x-auto pb-2 no-scrollbar flex-1 justify-end">
+                                        {heatmapData.map((week, weekIdx) => (
+                                            <div key={weekIdx} className="flex flex-col gap-[4px]">
+                                                {week.map((level, dayIdx) => (
+                                                    <div
+                                                        key={dayIdx}
+                                                        className={`w-[16px] h-[16px] rounded-[4px] ${heatmapColors[level]}`}
+                                                    />
+                                                ))}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="mt-2 flex items-center justify-end gap-1.5 text-[11px] font-medium text-slate-400 dark:text-zinc-500">
+                                <span className="mr-1">Less</span>
+                                <div className="w-[16px] h-[16px] rounded-[4px] bg-slate-200 dark:bg-zinc-800" />
+                                <div className="w-[16px] h-[16px] rounded-[4px] bg-primary/40" />
+                                <div className="w-[16px] h-[16px] rounded-[4px] bg-primary/80" />
+                                <div className="w-[16px] h-[16px] rounded-[4px] bg-primary" />
+                                <span className="ml-1">More</span>
+                            </div>
+                        </div>
+                    </section>
+                </>
+            )}
         </div>
     )
 }

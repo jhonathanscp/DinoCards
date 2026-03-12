@@ -6,16 +6,19 @@ declare(strict_types = 1)
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Actions\ProcessReviewAction;
 use App\Models\Flashcard;
 use App\Models\Subject;
+use App\Models\ReviewLog;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class SyncController extends Controller
 {
     /**
-     * Traz os dados modificados do servidor (Subject e Flashcard) para o client offline-first.
+     * Traz os dados modificados do servidor (Subject, Flashcard e ReviewLog) para o client offline-first.
      */
     public function pull(Request $request)
     {
@@ -24,16 +27,19 @@ class SyncController extends Controller
 
         $querySubjects = Subject::where('user_id', $user->id)->withTrashed();
         $queryFlashcards = Flashcard::where('user_id', $user->id)->withTrashed();
+        $queryReviewLogs = ReviewLog::where('user_id', $user->id)->withTrashed();
 
         if ($lastPulledAt) {
             $parsedDate = Carbon::parse($lastPulledAt);
             $querySubjects->where('updated_at', '>', $parsedDate);
             $queryFlashcards->where('updated_at', '>', $parsedDate);
+            $queryReviewLogs->where('updated_at', '>', $parsedDate);
         }
 
         return response()->json([
             'subjects' => $querySubjects->get(),
             'flashcards' => $queryFlashcards->get(),
+            'review_logs' => $queryReviewLogs->get(),
             'timestamp' => now()->toIso8601String(),
         ]);
     }
@@ -41,16 +47,18 @@ class SyncController extends Controller
     /**
      * Recebe dados locais modificados pelo usuário e sincroniza para a nuvem.
      */
-    public function push(Request $request)
+    public function push(Request $request, ProcessReviewAction $processReviewAction)
     {
         $user = $request->user();
         $validated = $request->validate([
             'subjects' => 'nullable|array',
             'flashcards' => 'nullable|array',
+            'review_logs' => 'nullable|array',
         ]);
 
         $subjects = $validated['subjects'] ?? [];
         $flashcards = $validated['flashcards'] ?? [];
+        $reviewLogs = $validated['review_logs'] ?? [];
 
         DB::beginTransaction();
 
@@ -100,12 +108,51 @@ class SyncController extends Controller
                 }
             }
 
+            // Processa ReviewLogs e executa o algoritmo SM-2 para cada um
+            foreach ($reviewLogs as $logData) {
+                if (!empty($logData['deleted_at'])) {
+                    ReviewLog::where('id', $logData['id'])
+                        ->where('user_id', $user->id)
+                        ->delete(); // SoftDelete local
+                }
+                else {
+                    $log = ReviewLog::updateOrCreate(
+                    ['id' => $logData['id'], 'user_id' => $user->id],
+                    [
+                        'flashcard_id' => $logData['flashcard_id'],
+                        'grade' => $logData['grade'],
+                        'reviewed_at' => Carbon::parse($logData['reviewed_at']),
+                        'created_at' => isset($logData['created_at']) ?Carbon::parse($logData['created_at']) : now(),
+                        'updated_at' => isset($logData['updated_at']) ?Carbon::parse($logData['updated_at']) : now(),
+                    ]
+                    );
+
+                    // Se foi recém-criado, roda o cálculo SRS (isso impede recalcular logs antigos que caíram num sync repetido)
+                    if ($log->wasRecentlyCreated) {
+                        try {
+                            $flashcardToUpdate = Flashcard::where('id', $log->flashcard_id)
+                                ->where('user_id', $user->id)
+                                ->first();
+
+                            if ($flashcardToUpdate) {
+                                // A action ProcessReviewAction contém a regra de negócio SM-2 (Ease, Interval) e chama $flashcard->save()
+                                $processReviewAction->execute($flashcardToUpdate, (int)$log->grade);
+                            }
+                        }
+                        catch (\Exception $e) {
+                            Log::error('Erro ao processar SRS no Sync: ' . $e->getMessage());
+                        }
+                    }
+                }
+            }
+
             DB::commit();
 
             return response()->json(['status' => 'success']);
         }
         catch (\Exception $e) {
             DB::rollBack();
+            Log::error('Sync error: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
             return response()->json([
                 'status' => 'error',
                 'message' => $e->getMessage()

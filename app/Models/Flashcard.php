@@ -40,6 +40,8 @@ class Flashcard extends Model
         'ease_factor',
         'interval',
         'repetitions',
+        'created_at',
+        'updated_at',
     ];
 
     /**

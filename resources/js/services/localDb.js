@@ -17,6 +17,11 @@ const metaStore = localforage.createInstance({
     storeName: 'sync_metadata'
 });
 
+const reviewLogsStore = localforage.createInstance({
+    name: 'FlashcardApp',
+    storeName: 'review_logs'
+});
+
 /**
  * Generic helper to get all items from a store
  */
@@ -26,6 +31,40 @@ const getAllItems = async (store) => {
         items.push(value);
     });
     return items;
+};
+
+/**
+ * Triggers a custom event so the app knows local data changed and a sync can be scheduled
+ */
+const triggerLocalDbChanged = () => {
+    if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('localDbChanged'));
+    }
+};
+
+// ============================================
+// Review Logs
+// ============================================
+
+export const logReview = async (flashcardId, grade) => {
+    const log = {
+        id: uuidv4(),
+        flashcard_id: flashcardId,
+        grade: grade, // 1 (Again), 2 (Hard), 3 (Good), 4 (Easy)
+        reviewed_at: new Date().toISOString(),
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        deleted_at: null,
+        is_synced: false
+    };
+    await reviewLogsStore.setItem(log.id, log);
+    triggerLocalDbChanged();
+    return log;
+};
+
+export const getReviewLogs = async () => {
+    const logs = await getAllItems(reviewLogsStore);
+    return logs.filter(log => !log.deleted_at);
 };
 
 // ============================================
@@ -52,6 +91,7 @@ export const createSubject = async (data) => {
         is_synced: false
     };
     await subjectsStore.setItem(newSubject.id, newSubject);
+    triggerLocalDbChanged();
     return newSubject;
 };
 
@@ -66,6 +106,7 @@ export const updateSubject = async (id, data) => {
         is_synced: false
     };
     await subjectsStore.setItem(id, updatedSubject);
+    triggerLocalDbChanged();
     return updatedSubject;
 };
 
@@ -81,6 +122,7 @@ export const deleteSubject = async (id) => {
         is_synced: false
     };
     await subjectsStore.setItem(id, deletedSubject);
+    triggerLocalDbChanged();
     return deletedSubject;
 };
 
@@ -117,6 +159,7 @@ export const createFlashcard = async (data) => {
         is_synced: false
     };
     await flashcardsStore.setItem(newCard.id, newCard);
+    triggerLocalDbChanged();
     return newCard;
 };
 
@@ -131,6 +174,7 @@ export const updateFlashcard = async (id, data) => {
         is_synced: false
     };
     await flashcardsStore.setItem(id, updatedCard);
+    triggerLocalDbChanged();
     return updatedCard;
 };
 
@@ -146,6 +190,7 @@ export const deleteFlashcard = async (id) => {
         is_synced: false
     };
     await flashcardsStore.setItem(id, deletedCard);
+    triggerLocalDbChanged();
     return deletedCard;
 };
 
@@ -155,8 +200,10 @@ export const deleteFlashcard = async (id) => {
 
 export const getRawSubjects = async () => await getAllItems(subjectsStore);
 export const getRawFlashcards = async () => await getAllItems(flashcardsStore);
+export const getRawReviewLogs = async () => await getAllItems(reviewLogsStore);
 export const saveRawSubject = async (subject) => await subjectsStore.setItem(subject.id, subject);
 export const saveRawFlashcard = async (flashcard) => await flashcardsStore.setItem(flashcard.id, flashcard);
+export const saveRawReviewLog = async (log) => await reviewLogsStore.setItem(log.id, log);
 
 export const getSyncMetadata = async (key) => await metaStore.getItem(key);
 export const saveSyncMetadata = async (key, value) => await metaStore.setItem(key, value);

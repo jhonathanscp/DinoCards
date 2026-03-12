@@ -36,6 +36,8 @@ class Subject extends Model
         'user_id',
         'name',
         'color_code',
+        'created_at',
+        'updated_at',
     ];
 
     // ──────────────────────────────────────

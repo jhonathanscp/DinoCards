@@ -12,11 +12,36 @@ import StudyPage from './pages/StudyPage'
 import DeckConfigPage from './pages/DeckConfigPage'
 import AuthPage from './pages/AuthPage'
 import EditCardPage from './pages/EditCardPage'
+import { useEffect } from 'react'
+import { debouncedPushToServer } from './services/syncService'
+
+function AutoSyncManager() {
+    useEffect(() => {
+        const handleDbChange = () => {
+            debouncedPushToServer();
+        };
+
+        const handleOnline = () => {
+            debouncedPushToServer();
+        };
+
+        window.addEventListener('localDbChanged', handleDbChange);
+        window.addEventListener('online', handleOnline);
+
+        return () => {
+            window.removeEventListener('localDbChanged', handleDbChange);
+            window.removeEventListener('online', handleOnline);
+        };
+    }, []);
+
+    return null;
+}
 
 function App() {
     return (
         <ThemeProvider>
             <AuthProvider>
+                <AutoSyncManager />
                 <BrowserRouter>
                     <Routes>
                         <Route element={<ProtectedRoute />}>
@@ -40,3 +65,4 @@ function App() {
 }
 
 export default App
+

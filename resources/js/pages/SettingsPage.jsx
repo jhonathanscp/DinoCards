@@ -1,7 +1,20 @@
 import { useTheme } from '../context/ThemeContext'
+import { useAuth } from '../context/AuthContext'
+import { useNavigate } from 'react-router-dom'
 
 export default function SettingsPage() {
     const { isDark, toggleTheme } = useTheme()
+    const { user, logout } = useAuth()
+    const navigate = useNavigate()
+
+    const handleLogout = async () => {
+        try {
+            await logout()
+            navigate('/login', { replace: true })
+        } catch (error) {
+            console.error('Logout failed:', error)
+        }
+    }
 
     return (
         <>
@@ -21,7 +34,7 @@ export default function SettingsPage() {
                 <div className="bg-white dark:bg-surface-dark border-t border-b border-slate-200 dark:border-border-dark transition-colors">
                     <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-border-dark">
                         <span className="text-base text-slate-900 dark:text-white">Email</span>
-                        <span className="text-base text-slate-400 dark:text-zinc-500">user@example.com</span>
+                        <span className="text-base text-slate-400 dark:text-zinc-500">{user?.email || 'Not logged in'}</span>
                     </div>
                     <div className="flex items-center justify-between p-4">
                         <span className="text-base text-slate-900 dark:text-white">Sync Status</span>
@@ -82,15 +95,26 @@ export default function SettingsPage() {
                     </div>
                 </div>
 
-                {/* Sync Button */}
-                <div className="mt-10 px-4 flex flex-col items-center">
+                {/* Sync & Logout Buttons */}
+                <div className="mt-10 px-4 flex flex-col items-center gap-4">
+                    <div className="w-full text-center">
+                        <button
+                            className="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-xl shadow-sm text-base font-semibold text-white bg-primary hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all active:scale-[0.98]"
+                            type="button"
+                        >
+                            Force Sync
+                        </button>
+                        <p className="mt-3 text-sm text-slate-400 dark:text-zinc-500">Last synced: 2 minutes ago</p>
+                    </div>
+
                     <button
-                        className="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-xl shadow-sm text-base font-semibold text-white bg-primary hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all active:scale-[0.98]"
+                        onClick={handleLogout}
+                        className="w-full flex items-center justify-center gap-2 py-3.5 px-4 border border-red-200 dark:border-red-900/50 rounded-xl shadow-sm text-base font-semibold text-red-600 dark:text-red-400 bg-red-50 hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-900/40 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all active:scale-[0.98] mt-4"
                         type="button"
                     >
-                        Force Sync
+                        <span className="material-symbols-outlined">logout</span>
+                        Log Out
                     </button>
-                    <p className="mt-3 text-sm text-slate-400 dark:text-zinc-500">Last synced: 2 minutes ago</p>
                 </div>
             </main>
         </>
