@@ -12,6 +12,7 @@ import StudyPage from './pages/StudyPage'
 import DeckConfigPage from './pages/DeckConfigPage'
 import AuthPage from './pages/AuthPage'
 import EditCardPage from './pages/EditCardPage'
+import SyncPage from './pages/SyncPage'
 import { useEffect } from 'react'
 import { debouncedPushToServer } from './services/syncService'
 
@@ -45,6 +46,7 @@ function App() {
                 <BrowserRouter>
                     <Routes>
                         <Route element={<ProtectedRoute />}>
+                            <Route path="/sync" element={<SyncPage />} />
                             <Route element={<Layout />}>
                                 <Route path="/" element={<DecksPage />} />
                                 <Route path="/add" element={<AddCardPage />} />

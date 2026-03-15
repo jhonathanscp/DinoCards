@@ -27,7 +27,7 @@ export default defineConfig({
         strictPort: true, // Garante que a porta 5173 não mude para 5174 etc.
         cors: true, // Permite requisições do celular (CORS)
         hmr: {
-            host: '10.0.0.161', // Garante que o Laravel injete o IP da rede e não "localhost"
+            host: '10.0.0.162', // Garante que o Laravel injete o IP da rede e não "localhost"
         },
     },
 })

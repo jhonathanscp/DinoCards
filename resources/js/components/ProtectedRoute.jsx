@@ -1,8 +1,9 @@
-import { Navigate, Outlet } from 'react-router-dom';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 export default function ProtectedRoute() {
-    const { user, isLoading } = useAuth();
+    const { user, isLoading, syncCompleted } = useAuth();
+    const location = useLocation();
 
     if (isLoading) {
         return (
@@ -14,6 +15,11 @@ export default function ProtectedRoute() {
 
     if (!user) {
         return <Navigate to="/login" replace />;
+    }
+
+    // Se o usuário está logado mas ainda não sincronizou e não está na página de sync
+    if (!syncCompleted && location.pathname !== '/sync') {
+        return <Navigate to="/sync" replace />;
     }
 
     return <Outlet />;
