@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { getFlashcards, logReview } from '../services/localDb'
 
 export default function StudyPage() {
     const navigate = useNavigate()
+    const location = useLocation()
+    const deckId = location.state?.deckId
+    
     const [studyCards, setStudyCards] = useState([])
     const [loading, setLoading] = useState(true)
     const [currentIndex, setCurrentIndex] = useState(0)
@@ -13,11 +16,16 @@ export default function StudyPage() {
     useEffect(() => {
         const fetchCards = async () => {
             try {
-                // Future Implementation: pass subject_id and filter by due date. 
-                // For now, grabbing all non-deleted flashcards.
-                const cards = await getFlashcards()
-                if (cards.length === 0) setCompleted(true)
-                setStudyCards(cards)
+                const allCards = await getFlashcards(deckId)
+                const now = new Date()
+                
+                const dueCards = allCards.filter(card => {
+                    if (!card.next_review_at) return true; // New card
+                    return new Date(card.next_review_at) <= now; // Due card
+                })
+                
+                if (dueCards.length === 0) setCompleted(true)
+                setStudyCards(dueCards)
             } catch (error) {
                 console.error("Error fetching study session", error)
             } finally {
@@ -25,7 +33,7 @@ export default function StudyPage() {
             }
         }
         fetchCards()
-    }, [])
+    }, [deckId])
 
     const totalCards = studyCards.length
     const card = studyCards[currentIndex]
@@ -77,34 +85,29 @@ export default function StudyPage() {
 
     return (
         <div className="bg-slate-50 dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 font-display min-h-screen flex flex-col antialiased transition-colors">
-            {/* Header */}
-            <header className="pt-12 pb-4 px-4 bg-white dark:bg-zinc-900 border-b border-slate-200 dark:border-zinc-800 flex flex-col gap-4 transition-colors">
-                <div className="flex items-center justify-between">
-                    <button
-                        onClick={() => navigate('/')}
-                        className="p-2 -ml-2 text-slate-400 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-full transition-colors"
-                    >
-                        <span className="material-icons text-xl">close</span>
+            {/* Header Padronizado */}
+            <header className="flex flex-col sticky top-0 bg-slate-100/80 dark:bg-background-dark/80 backdrop-blur-md z-10 border-b border-slate-200 dark:border-primary/10 transition-colors">
+                <div className="flex items-center p-4 pb-2 justify-between">
+                    <button className="flex size-12 shrink-0 items-center justify-center text-slate-500 dark:text-zinc-300 hover:text-primary transition-colors" onClick={() => navigate('/')}>
+                        <span className="material-symbols-outlined text-2xl">arrow_back</span>
                     </button>
-                    <div className="text-center">
-                        <h1 className="font-semibold text-base">Basic Review</h1>
-                        <p className="text-xs text-slate-400 dark:text-zinc-400 mt-0.5">
+                    <div className="flex-1 text-center pr-12">
+                        <h2 className="text-lg font-bold leading-tight tracking-tight text-slate-900 dark:text-zinc-200">
+                            Basic Review
+                        </h2>
+                        <p className="text-[10px] text-slate-400 dark:text-zinc-400 font-medium mt-0.5 uppercase tracking-wider">
                             {currentIndex + 1} / {totalCards} Cards
                         </p>
                     </div>
-                    <button
-                        onClick={() => navigate('/')}
-                        className="p-2 -mr-2 text-primary font-medium text-sm rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
-                    >
-                        END
-                    </button>
                 </div>
                 {/* Progress Bar */}
-                <div className="h-1.5 w-full bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden">
-                    <div
-                        className="h-full bg-primary rounded-full transition-all duration-500 ease-out"
-                        style={{ width: `${progress}%` }}
-                    />
+                <div className="px-4 pb-3">
+                    <div className="h-1.5 w-full bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden">
+                        <div
+                            className="h-full bg-primary rounded-full transition-all duration-500 ease-out"
+                            style={{ width: `${progress}%` }}
+                        />
+                    </div>
                 </div>
             </header>
 

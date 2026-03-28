@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { getSubjects, createFlashcard } from '../services/localDb'
 
 export default function AddCardPage() {
+    const navigate = useNavigate()
     const [decks, setDecks] = useState([])
     const [front, setFront] = useState('')
     const [back, setBack] = useState('')
@@ -26,7 +28,8 @@ export default function AddCardPage() {
                 await createFlashcard({
                     subject_id: selectedDeck,
                     front: front.trim(),
-                    back: back.trim()
+                    back: back.trim(),
+                    tags: tags.trim()
                 })
                 setSaved(true)
                 setTimeout(() => {
@@ -43,19 +46,14 @@ export default function AddCardPage() {
 
     return (
         <>
-            <header className="flex items-center px-4 py-4 justify-between sticky top-0 bg-slate-100/90 dark:bg-background-dark/90 backdrop-blur-md z-10 border-b border-slate-200 dark:border-zinc-900 transition-colors">
-                <div className="flex size-10 shrink-0" />
-                <h2 className="text-slate-900 dark:text-zinc-200 text-lg font-bold leading-tight tracking-tight flex-1 text-center">
+            {/* Header */}
+            <header className="flex items-center p-4 pb-2 justify-between sticky top-0 bg-slate-100/80 dark:bg-background-dark/80 backdrop-blur-md z-10 border-b border-slate-200 dark:border-primary/10 transition-colors">
+                <button className="flex size-12 shrink-0 items-center justify-center text-slate-500 dark:text-zinc-300 hover:text-primary transition-colors" onClick={() => window.history.back()}>
+                    <span className="material-symbols-outlined text-2xl">arrow_back</span>
+                </button>
+                <h2 className="text-lg font-bold leading-tight tracking-tight flex-1 text-center pr-12 text-slate-900 dark:text-zinc-200">
                     Add Card
                 </h2>
-                <div className="flex size-10 shrink-0 items-center justify-center">
-                    <button
-                        onClick={handleSave}
-                        className="text-primary font-semibold text-sm hover:text-blue-300 transition-colors"
-                    >
-                        Save
-                    </button>
-                </div>
             </header>
 
             <main className="flex-1 overflow-y-auto pb-6 max-w-md mx-auto w-full">

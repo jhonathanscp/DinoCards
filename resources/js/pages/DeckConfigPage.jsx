@@ -34,26 +34,13 @@ export default function DeckConfigPage() {
     return (
         <div className="bg-slate-100 dark:bg-background-dark min-h-screen flex flex-col font-display text-slate-900 dark:text-text-main-dark transition-colors">
             {/* Header */}
-            <header className="flex items-center px-4 py-4 justify-between sticky top-0 bg-slate-100/90 dark:bg-background-dark/90 backdrop-blur-md z-10 border-b border-slate-200 dark:border-zinc-900 transition-colors">
-                <div className="flex size-10 shrink-0 items-center justify-center">
-                    <button
-                        onClick={() => navigate('/')}
-                        className="text-slate-500 dark:text-zinc-300 hover:text-slate-900 dark:hover:text-white transition-colors"
-                    >
-                        <span className="material-icons text-2xl">arrow_back</span>
-                    </button>
-                </div>
-                <h2 className="text-slate-900 dark:text-zinc-200 text-lg font-bold leading-tight tracking-tight flex-1 text-center">
+            <header className="flex items-center p-4 pb-2 justify-between sticky top-0 bg-slate-100/80 dark:bg-background-dark/80 backdrop-blur-md z-10 border-b border-slate-200 dark:border-primary/10 transition-colors">
+                <button className="flex size-12 shrink-0 items-center justify-center text-slate-500 dark:text-zinc-300 hover:text-primary transition-colors" onClick={() => navigate('/')}>
+                    <span className="material-symbols-outlined text-2xl">arrow_back</span>
+                </button>
+                <h2 className="text-lg font-bold leading-tight tracking-tight flex-1 text-center pr-12 text-slate-900 dark:text-zinc-200">
                     Deck Settings
                 </h2>
-                <div className="flex size-10 shrink-0 items-center justify-center">
-                    <button
-                        onClick={handleSave}
-                        className="text-primary font-semibold text-sm hover:text-blue-300 transition-colors"
-                    >
-                        Save
-                    </button>
-                </div>
             </header>
 
             <main className="flex-1 overflow-y-auto pb-12 max-w-md mx-auto w-full">
@@ -145,6 +132,16 @@ export default function DeckConfigPage() {
                         <span className="text-base text-slate-900 dark:text-white">Due</span>
                         <span className="text-base text-card-due">{deck.dueCount || 0}</span>
                     </div>
+                </div>
+
+                {/* Save Button */}
+                <div className="mt-8 px-4">
+                    <button
+                        onClick={handleSave}
+                        className="w-full flex justify-center py-3.5 px-4 rounded-xl shadow-sm text-base font-semibold text-white bg-primary hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all active:scale-[0.98]"
+                    >
+                        Save Actions
+                    </button>
                 </div>
 
                 {/* Danger Zone */}

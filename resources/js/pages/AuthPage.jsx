@@ -31,7 +31,20 @@ export default function AuthPage() {
             }
             navigate('/', { replace: true })
         } catch (err) {
-            setError(err.response?.data?.message || 'Something went wrong. Please try again.')
+            if (err.response) {
+                if (err.response.status === 401) {
+                    setError('Credenciais incorretas. Tente novamente.')
+                } else if (err.response.status === 422 && err.response.data.errors) {
+                    const validationErrors = Object.values(err.response.data.errors).flat()
+                    setError(validationErrors.join(' '))
+                } else {
+                    setError(err.response.data?.message || 'Falha na autenticação.')
+                }
+            } else if (err.request) {
+                setError('Erro de conexão. Verifique se o servidor está rodando.')
+            } else {
+                setError(err.message || 'Um erro inesperado ocorreu.')
+            }
         } finally {
             setLoading(false)
         }

@@ -36,6 +36,7 @@ class Flashcard extends Model
         'subject_id',
         'front',
         'back',
+        'tags',
         'next_review_at',
         'ease_factor',
         'interval',

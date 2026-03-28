@@ -47,10 +47,13 @@ const triggerLocalDbChanged = () => {
 // ============================================
 
 export const logReview = async (flashcardId, grade) => {
+    const card = await getFlashcard(flashcardId);
+    if (!card) throw new Error('Card not found');
+
     const log = {
         id: uuidv4(),
         flashcard_id: flashcardId,
-        grade: grade, // 1 (Again), 2 (Hard), 3 (Good), 4 (Easy)
+        grade: grade, // 1 (Again), 3 (Good), 5 (Easy)
         reviewed_at: new Date().toISOString(),
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
@@ -58,6 +61,43 @@ export const logReview = async (flashcardId, grade) => {
         is_synced: false
     };
     await reviewLogsStore.setItem(log.id, log);
+
+    let quality = Math.max(0, Math.min(5, grade));
+    let easeFactor = card.ease_factor ?? 2.5;
+    let interval = card.interval ?? 0;
+    let repetitions = card.repetitions ?? 0;
+
+    if (quality < 3) {
+        repetitions = 0;
+        interval = 1;
+    } else {
+        if (repetitions === 0) {
+            interval = 1;
+        } else if (repetitions === 1) {
+            interval = 6;
+        } else {
+            interval = Math.round(interval * easeFactor);
+        }
+        repetitions++;
+    }
+
+    easeFactor = easeFactor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02));
+    easeFactor = Math.max(1.3, easeFactor);
+
+    let nextReviewDate = new Date();
+    nextReviewDate.setDate(nextReviewDate.getDate() + interval);
+
+    const updatedCard = {
+        ...card,
+        ease_factor: easeFactor,
+        interval: interval,
+        repetitions: repetitions,
+        next_review_at: nextReviewDate.toISOString(),
+        updated_at: new Date().toISOString(),
+        is_synced: false
+    };
+    await flashcardsStore.setItem(updatedCard.id, updatedCard);
+
     triggerLocalDbChanged();
     return log;
 };

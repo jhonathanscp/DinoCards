@@ -1,11 +1,28 @@
+import { useState, useEffect } from 'react'
 import { useTheme } from '../context/ThemeContext'
 import { useAuth } from '../context/AuthContext'
 import { useNavigate } from 'react-router-dom'
+import { syncAll } from '../services/syncService'
+import { getSyncMetadata, getSubjects, getFlashcards, createSubject, createFlashcard } from '../services/localDb'
 
 export default function SettingsPage() {
     const { isDark, toggleTheme } = useTheme()
     const { user, logout } = useAuth()
     const navigate = useNavigate()
+    const [isSyncing, setIsSyncing] = useState(false)
+    const [syncMessage, setSyncMessage] = useState('')
+    const [lastSyncStr, setLastSyncStr] = useState('Never synced')
+    const [isImporting, setIsImporting] = useState(false)
+
+    useEffect(() => {
+        const fetchMeta = async () => {
+            const time = await getSyncMetadata('last_pulled_at')
+            if (time) {
+                setLastSyncStr(new Date(time).toLocaleString())
+            }
+        }
+        fetchMeta()
+    }, [])
 
     const handleLogout = async () => {
         try {
@@ -16,14 +33,108 @@ export default function SettingsPage() {
         }
     }
 
+    const handleForceSync = async () => {
+        setIsSyncing(true)
+        setSyncMessage('')
+        try {
+            await syncAll()
+            setSyncMessage('Sincronização concluída com sucesso!')
+            const time = await getSyncMetadata('last_pulled_at')
+            if (time) {
+                setLastSyncStr(new Date(time).toLocaleString())
+            }
+        } catch (error) {
+            setSyncMessage('Falha ao sincronizar. Verifique sua conexão.')
+        } finally {
+            setIsSyncing(false)
+            setTimeout(() => setSyncMessage(''), 4000)
+        }
+    }
+
+    const handleExportCsv = async () => {
+        try {
+            const cards = await getFlashcards()
+            const decks = await getSubjects()
+            const deckMap = {}
+            decks.forEach(d => deckMap[d.id] = d.name)
+            
+            let csv = "Deck,Front,Back,Tags\n"
+            cards.forEach(c => {
+                const clean = str => (str || '').toString().replace(/"/g, '""');
+                csv += `"${clean(deckMap[c.subject_id] || 'Default')}","${clean(c.front)}","${clean(c.back)}","${clean(c.tags)}"\n`
+            })
+            
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+            const url = URL.createObjectURL(blob)
+            const a = document.createElement('a')
+            a.href = url
+            a.download = `flashcards_export_${new Date().toISOString().split('T')[0]}.csv`
+            a.click()
+            URL.revokeObjectURL(url)
+            setSyncMessage('Exportado com sucesso!')
+        } catch (error) {
+            setSyncMessage('Erro ao exportar.')
+        } finally {
+            setTimeout(() => setSyncMessage(''), 3000)
+        }
+    }
+
+    const handleImportCsv = async (e) => {
+        const file = e.target.files[0]
+        if (!file) return
+        setIsImporting(true)
+        setSyncMessage('Importando...')
+        try {
+            const text = await file.text()
+            const lines = text.split('\n')
+            const decks = await getSubjects()
+            const deckNameMap = {}
+            decks.forEach(d => deckNameMap[d.name] = d.id)
+
+            // Skip header
+            for (let i = 1; i < lines.length; i++) {
+                if (!lines[i].trim()) continue
+                
+                // Matches values inside quotes or without quotes respecting commas
+                const matches = lines[i].match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g)
+                if (!matches || matches.length < 3) continue
+                
+                const clean = str => str ? str.replace(/^"|"$/g, '').replace(/""/g, '"') : ''
+                const deckName = clean(matches[0])
+                const front = clean(matches[1])
+                const back = clean(matches[2])
+                const tags = matches[3] ? clean(matches[3]) : ''
+                
+                let deckId = deckNameMap[deckName]
+                if (!deckId) {
+                    const newDeck = await createSubject({ name: deckName, parent_id: null })
+                    deckId = newDeck.id
+                    deckNameMap[deckName] = deckId
+                }
+                
+                await createFlashcard({ subject_id: deckId, front, back, tags })
+            }
+            setSyncMessage('Cartões importados com sucesso!')
+        } catch (error) {
+            setSyncMessage('Erro ao importar.')
+            console.error(error)
+        } finally {
+            setIsImporting(false)
+            e.target.value = null // reset input
+            setTimeout(() => setSyncMessage(''), 3000)
+        }
+    }
+
     return (
         <>
-            <header className="flex items-center px-4 py-4 justify-between sticky top-0 bg-slate-100/90 dark:bg-background-dark/90 backdrop-blur-md z-10 border-b border-slate-200 dark:border-zinc-900 transition-colors">
-                <div className="flex size-10 shrink-0" />
-                <h2 className="text-slate-900 dark:text-zinc-200 text-lg font-bold leading-tight tracking-tight flex-1 text-center">
+            {/* Header */}
+            <header className="flex items-center p-4 pb-2 justify-between sticky top-0 bg-slate-100/80 dark:bg-background-dark/80 backdrop-blur-md z-10 border-b border-slate-200 dark:border-primary/10 transition-colors">
+                <button className="flex size-12 shrink-0 items-center justify-center text-slate-500 dark:text-zinc-300 hover:text-primary transition-colors" onClick={() => navigate('/')}>
+                    <span className="material-symbols-outlined text-2xl">arrow_back</span>
+                </button>
+                <h2 className="text-lg font-bold leading-tight tracking-tight flex-1 text-center pr-12 text-slate-900 dark:text-zinc-200">
                     Settings
                 </h2>
-                <div className="flex size-10 shrink-0" />
             </header>
 
             <main className="flex-1 overflow-y-auto pb-6 max-w-md mx-auto w-full">
@@ -38,7 +149,11 @@ export default function SettingsPage() {
                     </div>
                     <div className="flex items-center justify-between p-4">
                         <span className="text-base text-slate-900 dark:text-white">Sync Status</span>
-                        <span className="text-base text-emerald-500 font-medium">Up to date</span>
+                        {syncMessage ? (
+                            <span className="text-sm text-card-learning font-medium animate-pulse">{syncMessage}</span>
+                        ) : (
+                            <span className="text-base text-emerald-500 font-medium">{isSyncing ? 'Sincronizando...' : 'Online'}</span>
+                        )}
                     </div>
                 </div>
 
@@ -95,16 +210,42 @@ export default function SettingsPage() {
                     </div>
                 </div>
 
+                {/* Data Section */}
+                <div className="mt-8 px-4 py-2 text-xs font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">
+                    Data Management
+                </div>
+                <div className="bg-white dark:bg-surface-dark border-t border-b border-slate-200 dark:border-border-dark transition-colors">
+                    <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-border-dark cursor-pointer active:bg-slate-50 dark:active:bg-zinc-800 transition-colors" onClick={handleExportCsv}>
+                        <div className="flex items-center gap-3 text-slate-900 dark:text-white">
+                            <span className="material-symbols-outlined text-xl text-slate-500 dark:text-zinc-400">download</span>
+                            <span className="text-base">Exportar CSV</span>
+                        </div>
+                    </div>
+                    <div className="flex items-center justify-between p-4 cursor-pointer active:bg-slate-50 dark:active:bg-zinc-800 transition-colors relative">
+                        <input type="file" accept=".csv" onChange={handleImportCsv} disabled={isImporting} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed" title="Importar CSV" />
+                        <div className="flex items-center gap-3 text-slate-900 dark:text-white">
+                            <span className="material-symbols-outlined text-xl text-slate-500 dark:text-zinc-400">upload</span>
+                            <span className="text-base">{isImporting ? 'Importando...' : 'Importar CSV'}</span>
+                        </div>
+                    </div>
+                </div>
+
                 {/* Sync & Logout Buttons */}
                 <div className="mt-10 px-4 flex flex-col items-center gap-4">
                     <div className="w-full text-center">
                         <button
-                            className="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-xl shadow-sm text-base font-semibold text-white bg-primary hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all active:scale-[0.98]"
+                            onClick={handleForceSync}
+                            disabled={isSyncing}
+                            className="w-full flex justify-center items-center py-3.5 px-4 border border-transparent rounded-xl shadow-sm text-base font-semibold text-white bg-primary hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all active:scale-[0.98] disabled:opacity-75"
                             type="button"
                         >
-                            Force Sync
+                            {isSyncing ? (
+                                <><span className="material-icons animate-spin mr-2">sync</span> Sincronizando...</>
+                            ) : (
+                                'Force Sync'
+                            )}
                         </button>
-                        <p className="mt-3 text-sm text-slate-400 dark:text-zinc-500">Last synced: 2 minutes ago</p>
+                        <p className="mt-3 text-sm text-slate-400 dark:text-zinc-500">Última sincronização: {lastSyncStr}</p>
                     </div>
 
                     <button

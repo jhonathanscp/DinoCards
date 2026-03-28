@@ -1,7 +1,11 @@
 import Axios from 'axios';
 
+const origin = typeof window !== 'undefined' && window.location.origin.startsWith('http') 
+    ? window.location.origin 
+    : 'http://127.0.0.1:8000';
+
 const axios = Axios.create({
-    baseURL: 'http://127.0.0.1:8000', // Forçado para resolver conflito de localhost no Electron
+    baseURL: import.meta.env.VITE_API_URL || origin,
     headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',

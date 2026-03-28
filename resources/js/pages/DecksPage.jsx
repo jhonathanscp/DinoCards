@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getSubjects, createSubject } from '../services/localDb'
+import { getSubjects, createSubject, getFlashcards, getReviewLogs } from '../services/localDb'
 import { syncAll } from '../services/syncService'
 
 function CountBadge({ value, type }) {
@@ -21,58 +21,70 @@ function DeckRow({ deck, isChild = false, expandedIds, toggleExpand, onStudy, on
     return (
         <>
             <div
-                className={`w-full flex items-center ${isChild ? 'pl-10 pr-4 py-2' : 'px-4 py-3'} 
+                className={`relative w-full flex items-center py-2.5 pr-4 
           ${deck.isActive ? 'bg-blue-50 dark:bg-blue-950/40' : 'hover:bg-slate-50 dark:hover:bg-zinc-800'} 
-          transition-colors border-b border-slate-200 dark:border-border-dark last:border-0 group`}
+          transition-colors border-b border-slate-200 dark:border-border-dark last:border-0 group select-none`}
+                style={{ paddingLeft: isChild ? '3rem' : '1rem' }}
             >
+                {/* Linha vertical conectora visual para subdecks (L-shape) */}
+                {isChild && (
+                    <div className="absolute left-[1.125rem] top-0 w-4 h-1/2 border-l-2 border-b-2 border-slate-300 dark:border-zinc-700 rounded-bl-sm pointer-events-none" />
+                )}
+
+                {/* Expand Button */}
+                <div className="w-8 flex-shrink-0 flex items-center justify-start z-10">
+                    {hasChildren && (
+                        <button
+                            onClick={(e) => { e.stopPropagation(); toggleExpand(deck.id); }}
+                            className="p-0.5 rounded-md text-slate-500 hover:text-slate-800 dark:text-zinc-400 dark:hover:text-zinc-100 hover:bg-slate-200 dark:hover:bg-zinc-700 transition-colors"
+                        >
+                            <span className="material-icons text-[20px] transition-transform duration-200" style={{ transform: isExpanded ? 'rotate(90deg)' : 'none' }}>
+                                chevron_right
+                            </span>
+                        </button>
+                    )}
+                </div>
+
+                {/* Study Button (Deck Name) */}
                 <button
-                    onClick={() => {
-                        if (hasChildren) {
-                            toggleExpand(deck.id)
-                        } else {
-                            onStudy()
-                        }
-                    }}
-                    className="flex items-center flex-1 text-left focus:outline-none"
+                    onClick={() => onStudy(deck)}
+                    className="flex flex-1 items-center justify-start text-left focus:outline-none min-w-0 py-1"
                 >
-                    {!isChild && hasChildren && (
-                        <span className={`material-icons text-sm mr-2 text-slate-400 dark:text-text-muted-dark transition-transform ${isExpanded ? 'rotate-0' : ''}`}>
-                            {isExpanded ? 'remove' : 'add'}
-                        </span>
-                    )}
-                    {!isChild && !hasChildren && (
-                        <span className="material-icons text-sm mr-2 text-transparent group-hover:text-slate-400 dark:group-hover:text-text-muted-dark transition-colors">
-                            circle
-                        </span>
-                    )}
-                    <span className={`font-medium text-sm ${deck.isActive ? 'text-primary' : isChild ? 'text-slate-700 dark:text-text-main-dark' : ''}`}>
+                    <span className={`font-semibold text-[15px] truncate ${isChild ? 'text-slate-600 dark:text-zinc-300' : 'text-slate-800 dark:text-zinc-100'}`}>
                         {deck.name}
                     </span>
                 </button>
 
-                {/* Settings icon – always visible on hover */}
+                {/* Settings icon */}
                 <button
                     onClick={(e) => {
                         e.stopPropagation()
                         onConfig(deck)
                     }}
-                    className="p-1 mr-2 rounded-full text-slate-400 dark:text-text-muted-dark opacity-0 group-hover:opacity-100 hover:bg-slate-200 dark:hover:bg-zinc-700 transition-all focus:outline-none"
+                    className="p-1 mx-2 rounded-full text-slate-400 dark:text-text-muted-dark opacity-0 md:opacity-0 group-hover:opacity-100 focus:opacity-100 hover:bg-slate-200 dark:hover:bg-zinc-700 transition-all focus:outline-none flex-shrink-0 z-10"
                     title="Deck settings"
                 >
-                    <span className="material-icons text-sm">settings</span>
+                    <span className="material-icons text-[18px]">settings</span>
                 </button>
 
-                <div className="flex space-x-4 text-right w-32 justify-end text-sm font-medium">
+                {/* Counts */}
+                <div className="flex space-x-3 text-right text-[13px] font-semibold flex-shrink-0">
                     <CountBadge value={deck.newCount} type="new" />
                     <CountBadge value={deck.lrnCount} type="learning" />
                     <CountBadge value={deck.dueCount} type="due" />
                 </div>
             </div>
+            
             {isExpanded && hasChildren && (
-                <div className="bg-slate-50 dark:bg-surface-dark">
-                    {deck.children.map((child) => (
-                        <DeckRow key={child.id} deck={child} isChild={true} expandedIds={expandedIds} toggleExpand={toggleExpand} onStudy={onStudy} onConfig={onConfig} />
-                    ))}
+                <div className="relative">
+                    {/* Linha vertical principal para conectar os filhos seguintes */}
+                    <div className="absolute left-[1.125rem] top-0 bottom-0 w-[2px] bg-slate-300 dark:bg-zinc-700 pointer-events-none" />
+                    
+                    <div className="relative z-10">
+                        {deck.children.map((child) => (
+                            <DeckRow key={child.id} deck={child} isChild={true} expandedIds={expandedIds} toggleExpand={toggleExpand} onStudy={onStudy} onConfig={onConfig} />
+                        ))}
+                    </div>
                 </div>
             )}
         </>
@@ -80,8 +92,9 @@ function DeckRow({ deck, isChild = false, expandedIds, toggleExpand, onStudy, on
 }
 
 /* ── Create Deck Modal ── */
-function CreateDeckModal({ isOpen, onClose, onCreateDeck }) {
+function CreateDeckModal({ isOpen, onClose, onCreateDeck, availableDecks }) {
     const [deckName, setDeckName] = useState('')
+    const [parentId, setParentId] = useState('')
     const [error, setError] = useState('')
 
     if (!isOpen) return null
@@ -92,8 +105,9 @@ function CreateDeckModal({ isOpen, onClose, onCreateDeck }) {
             setError('Deck name is required')
             return
         }
-        onCreateDeck(trimmed)
+        onCreateDeck(trimmed, parentId || null)
         setDeckName('')
+        setParentId('')
         setError('')
         onClose()
     }
@@ -136,10 +150,26 @@ function CreateDeckModal({ isOpen, onClose, onCreateDeck }) {
                             <p className="text-card-learning text-xs mt-1.5">{error}</p>
                         )}
                     </div>
+                    
+                    <div>
+                        <label className="block text-sm font-medium text-slate-500 dark:text-zinc-400 mb-2">
+                            Pastas / Baralho Pai (Opcional)
+                        </label>
+                        <select
+                            value={parentId}
+                            onChange={(e) => setParentId(e.target.value)}
+                            className="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-xl px-4 py-3 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-colors appearance-none"
+                        >
+                            <option value="">Nenhum (Nível Principal)</option>
+                            {availableDecks?.map(d => (
+                                <option key={d.id} value={d.id}>{d.name}</option>
+                            ))}
+                        </select>
+                    </div>
 
                     <div className="flex gap-3 pt-1">
                         <button
-                            onClick={() => { onClose(); setDeckName(''); setError('') }}
+                            onClick={() => { onClose(); setDeckName(''); setParentId(''); setError('') }}
                             className="flex-1 py-3 rounded-xl text-sm font-semibold text-slate-600 dark:text-zinc-300 bg-slate-200 dark:bg-zinc-800 hover:bg-slate-300 dark:hover:bg-zinc-700 border border-slate-300 dark:border-border-dark transition-colors active:scale-[0.98]"
                         >
                             Cancel
@@ -164,21 +194,70 @@ export default function DecksPage() {
     const [syncMessage, setSyncMessage] = useState('')
     const [expandedIds, setExpandedIds] = useState([])
     const [showCreateModal, setShowCreateModal] = useState(false)
+    const [cardsStudiedToday, setCardsStudiedToday] = useState(0)
+    const [rawSubjects, setRawSubjects] = useState([])
     const navigate = useNavigate()
 
     const fetchDecks = async () => {
         try {
             const data = await getSubjects()
-            // Map the subjects to deck format, setting counts to 0 for now as flashcards counts logic is more complex
-            const mappedDecks = data.map(sub => ({
-                id: sub.id,
-                name: sub.name,
-                newCount: 0,
-                lrnCount: 0,
-                dueCount: 0,
-                children: [] // No nested decks logic on backend
-            }))
-            setDecks(mappedDecks)
+            const allCards = await getFlashcards()
+            const now = new Date()
+            
+            console.log('Total cards fetched:', allCards.length);
+            console.log('Subjects fetched:', data.length);
+
+            const mappedDecks = data.map(sub => {
+                const deckCards = allCards.filter(c => String(c.subject_id) === String(sub.id))
+                let newCount = 0
+                let lrnCount = 0
+                let dueCount = 0
+
+                deckCards.forEach(card => {
+                    if (!card.next_review_at) {
+                        newCount++
+                    } else {
+                        const reviewDate = new Date(card.next_review_at)
+                        if (reviewDate <= now) {
+                            if (card.interval === 0 || card.repetitions === 0) {
+                                lrnCount++
+                            } else {
+                                dueCount++
+                            }
+                        }
+                    }
+                })
+
+                return {
+                    id: sub.id,
+                    name: sub.name,
+                    parent_id: sub.parent_id,
+                    newCount,
+                    lrnCount,
+                    dueCount,
+                    children: [] // No nested decks logic on backend
+                }
+            })
+            
+            const deckMap = {}
+            mappedDecks.forEach(d => deckMap[d.id] = d)
+            const tree = []
+            
+            mappedDecks.forEach(d => {
+                if (d.parent_id && deckMap[d.parent_id]) {
+                    deckMap[d.parent_id].children.push(d)
+                } else {
+                    tree.push(d)
+                }
+            })
+            
+            setRawSubjects(mappedDecks)
+            setDecks(tree)
+
+            const logs = await getReviewLogs()
+            const todayStr = now.toISOString().split('T')[0]
+            const studiedToday = logs.filter(log => log.reviewed_at.startsWith(todayStr)).length
+            setCardsStudiedToday(studiedToday)
         } catch (error) {
             console.error('Error fetching decks', error)
         } finally {
@@ -188,6 +267,15 @@ export default function DecksPage() {
 
     useEffect(() => {
         fetchDecks()
+        
+        const handleDbChange = () => {
+            fetchDecks()
+        }
+        window.addEventListener('localDbChanged', handleDbChange)
+        
+        return () => {
+            window.removeEventListener('localDbChanged', handleDbChange)
+        }
     }, [])
 
     const handleSync = async () => {
@@ -211,25 +299,18 @@ export default function DecksPage() {
         )
     }
 
-    const handleStudy = () => {
-        navigate('/study')
+    const handleStudy = (deck) => {
+        navigate('/study', { state: { deckId: deck.id } })
     }
 
     const handleConfig = (deck) => {
         navigate(`/deck/${deck.id}/config`, { state: { deck } })
     }
 
-    const handleCreateDeck = async (name) => {
+    const handleCreateDeck = async (name, parent_id) => {
         try {
-            const newSub = await createSubject({ name })
-            setDecks([...decks, {
-                id: newSub.id,
-                name: newSub.name,
-                newCount: 0,
-                lrnCount: 0,
-                dueCount: 0,
-                children: []
-            }])
+            await createSubject({ name, parent_id })
+            fetchDecks() // recarregar a arvore
         } catch (error) {
             console.error('Failed to create deck', error)
         }
@@ -285,8 +366,17 @@ export default function DecksPage() {
                                 <span className="material-icons animate-spin text-primary text-2xl">sync</span>
                             </div>
                         ) : decks.length === 0 ? (
-                            <div className="text-center py-6 text-slate-400 dark:text-zinc-500 text-sm">
-                                Não há decks criados.
+                            <div className="text-center py-12 px-6">
+                                <span className="material-icons text-5xl text-slate-300 dark:text-zinc-600 mb-4 block">style</span>
+                                <h3 className="text-lg font-bold text-slate-700 dark:text-zinc-300 mb-2">Nenhum baralho</h3>
+                                <p className="text-sm text-slate-500 dark:text-zinc-400 mb-6 font-medium">Crie seu primeiro baralho para começar a estudar e memorizar conteúdos!</p>
+                                <button 
+                                    onClick={() => setShowCreateModal(true)}
+                                    className="px-5 py-2.5 bg-primary/10 hover:bg-primary/20 text-primary font-semibold rounded-xl transition-colors inline-flex items-center"
+                                >
+                                    <span className="material-icons text-xl mr-2">add_circle</span>
+                                    Criar Baralho
+                                </button>
                             </div>
                         ) : (
                             decks.map((deck) => (
@@ -303,7 +393,7 @@ export default function DecksPage() {
                     </div>
 
                     <p className="text-xs text-slate-400 dark:text-text-muted-dark text-center mt-8">
-                        Studied 0 cards in 0 seconds today (0s/card)
+                        {cardsStudiedToday} cartões estudados hoje
                     </p>
                 </div>
             </main>
@@ -313,6 +403,7 @@ export default function DecksPage() {
                 isOpen={showCreateModal}
                 onClose={() => setShowCreateModal(false)}
                 onCreateDeck={handleCreateDeck}
+                availableDecks={rawSubjects}
             />
         </>
     )

@@ -34,6 +34,7 @@ class Subject extends Model
     protected $fillable = [
         'id',
         'user_id',
+        'parent_id',
         'name',
         'color_code',
         'created_at',
