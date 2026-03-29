@@ -42,7 +42,9 @@ class PushSyncRequest extends FormRequest
             'flashcards.*.id' => ['required', 'uuid'],
             'flashcards.*.subject_id' => ['required', 'uuid'],
             'flashcards.*.front' => ['required', 'string', 'max:10000'], // Limitador contra injeções de memória (Mega-payloads)
+            'flashcards.*.front_image' => ['nullable', 'string', 'max:500'], // URL
             'flashcards.*.back' => ['required', 'string', 'max:10000'],
+            'flashcards.*.back_image' => ['nullable', 'string', 'max:500'], // URL
             'flashcards.*.tags' => ['nullable', 'string', 'max:1000'],
             'flashcards.*.deleted_at' => ['nullable', 'string'],
 

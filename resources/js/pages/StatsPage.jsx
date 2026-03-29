@@ -97,7 +97,7 @@ export default function StatsPage() {
                     for (let day = DAYS_IN_WEEK - 1; day >= 0; day--) {
                         // Skip future days in the current week
                         if (week === WEEKS - 1 && day > currentDayOfWeek) {
-                            newHeatmapData[week][day] = -1; // -1 means empty space (future)
+                            newHeatmapData[week][day] = { level: -1, date: '', count: 0 }; // -1 means empty space (future)
                             continue;
                         }
 
@@ -115,7 +115,7 @@ export default function StatsPage() {
                             else level = 4;
                         }
 
-                        newHeatmapData[week][day] = level;
+                        newHeatmapData[week][day] = { level, date: dateStr, count: reviews };
                         dayOffset++;
                     }
                 }
@@ -253,10 +253,11 @@ export default function StatsPage() {
                                     <div className="flex gap-[4px] overflow-x-auto pb-2 no-scrollbar flex-1 justify-end">
                                         {heatmapData.map((week, weekIdx) => (
                                             <div key={weekIdx} className="flex flex-col gap-[4px]">
-                                                {week.map((level, dayIdx) => (
+                                                {week.map((dataObj, dayIdx) => (
                                                     <div
                                                         key={dayIdx}
-                                                        className={`w-[16px] h-[16px] rounded-[4px] ${heatmapColors[level]}`}
+                                                        title={dataObj.level === -1 ? undefined : `${dataObj.count} cards em ${dataObj.date}`}
+                                                        className={`w-[16px] h-[16px] rounded-[4px] ${heatmapColors[dataObj.level]}`}
                                                     />
                                                 ))}
                                             </div>

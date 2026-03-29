@@ -61,7 +61,7 @@ function DeckRow({ deck, isChild = false, expandedIds, toggleExpand, onStudy, on
                         e.stopPropagation()
                         onConfig(deck)
                     }}
-                    className="p-1 mx-2 rounded-full text-slate-400 dark:text-text-muted-dark opacity-0 md:opacity-0 group-hover:opacity-100 focus:opacity-100 hover:bg-slate-200 dark:hover:bg-zinc-700 transition-all focus:outline-none flex-shrink-0 z-10"
+                    className="p-1 mx-2 h-6 rounded-full text-slate-400 dark:text-text-muted-dark opacity-0 md:opacity-0 group-hover:opacity-100 focus:opacity-100 hover:bg-slate-200 dark:hover:bg-zinc-700 transition-all focus:outline-none flex-shrink-0 z-10"
                     title="Deck settings"
                 >
                     <span className="material-icons text-[18px]">settings</span>
@@ -74,12 +74,12 @@ function DeckRow({ deck, isChild = false, expandedIds, toggleExpand, onStudy, on
                     <CountBadge value={deck.dueCount} type="due" />
                 </div>
             </div>
-            
+
             {isExpanded && hasChildren && (
                 <div className="relative">
                     {/* Linha vertical principal para conectar os filhos seguintes */}
                     <div className="absolute left-[1.125rem] top-0 bottom-0 w-[2px] bg-slate-300 dark:bg-zinc-700 pointer-events-none" />
-                    
+
                     <div className="relative z-10">
                         {deck.children.map((child) => (
                             <DeckRow key={child.id} deck={child} isChild={true} expandedIds={expandedIds} toggleExpand={toggleExpand} onStudy={onStudy} onConfig={onConfig} />
@@ -150,7 +150,7 @@ function CreateDeckModal({ isOpen, onClose, onCreateDeck, availableDecks }) {
                             <p className="text-card-learning text-xs mt-1.5">{error}</p>
                         )}
                     </div>
-                    
+
                     <div>
                         <label className="block text-sm font-medium text-slate-500 dark:text-zinc-400 mb-2">
                             Pastas / Baralho Pai (Opcional)
@@ -203,7 +203,7 @@ export default function DecksPage() {
             const data = await getSubjects()
             const allCards = await getFlashcards()
             const now = new Date()
-            
+
             console.log('Total cards fetched:', allCards.length);
             console.log('Subjects fetched:', data.length);
 
@@ -238,11 +238,11 @@ export default function DecksPage() {
                     children: [] // No nested decks logic on backend
                 }
             })
-            
+
             const deckMap = {}
             mappedDecks.forEach(d => deckMap[d.id] = d)
             const tree = []
-            
+
             mappedDecks.forEach(d => {
                 if (d.parent_id && deckMap[d.parent_id]) {
                     deckMap[d.parent_id].children.push(d)
@@ -250,7 +250,7 @@ export default function DecksPage() {
                     tree.push(d)
                 }
             })
-            
+
             setRawSubjects(mappedDecks)
             setDecks(tree)
 
@@ -267,12 +267,12 @@ export default function DecksPage() {
 
     useEffect(() => {
         fetchDecks()
-        
+
         const handleDbChange = () => {
             fetchDecks()
         }
         window.addEventListener('localDbChanged', handleDbChange)
-        
+
         return () => {
             window.removeEventListener('localDbChanged', handleDbChange)
         }
@@ -370,7 +370,7 @@ export default function DecksPage() {
                                 <span className="material-icons text-5xl text-slate-300 dark:text-zinc-600 mb-4 block">style</span>
                                 <h3 className="text-lg font-bold text-slate-700 dark:text-zinc-300 mb-2">Nenhum baralho</h3>
                                 <p className="text-sm text-slate-500 dark:text-zinc-400 mb-6 font-medium">Crie seu primeiro baralho para começar a estudar e memorizar conteúdos!</p>
-                                <button 
+                                <button
                                     onClick={() => setShowCreateModal(true)}
                                     className="px-5 py-2.5 bg-primary/10 hover:bg-primary/20 text-primary font-semibold rounded-xl transition-colors inline-flex items-center"
                                 >

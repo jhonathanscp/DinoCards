@@ -57,7 +57,7 @@ export default function EditCardPage() {
                 setTimeout(() => {
                     setSaved(false)
                     navigate('/browse') // Redireciona para o Browse como solicitado
-                }, 1000)
+                }, 1300)
             } catch (error) {
                 console.error("Failed to update card", error)
             }
@@ -96,21 +96,26 @@ export default function EditCardPage() {
             <main className="flex-1 overflow-y-auto pb-12 max-w-md mx-auto w-full">
                 {/* Success Toast */}
                 {saved && (
-                    <div className="mx-4 mt-4 px-4 py-3 bg-card-due/20 border border-card-due/30 rounded-xl text-card-due text-sm font-medium text-center animate-pulse">
-                        ✓ Card updated successfully!
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm animate-[fadeIn_0.2s_ease-out]">
+                        <div className="bg-white dark:bg-surface-dark p-8 rounded-3xl shadow-2xl flex flex-col items-center animate-[scaleIn_0.2s_ease-out] mx-4 max-w-xs w-full border border-slate-100 dark:border-zinc-800">
+                            <span className="material-symbols-outlined text-[64px] text-emerald-500 mb-4 animate-bounce">check_circle</span>
+                            <h3 className="text-xl font-bold text-slate-800 dark:text-white text-center">Cartão Editado!</h3>
+                            <p className="text-slate-500 dark:text-zinc-400 text-sm mt-3 text-center font-medium">Redirecionando de volta...</p>
+                        </div>
                     </div>
                 )}
 
-                {/* Deck Selector */}
-                <div className="mt-6 px-4 py-2 text-xs font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">
-                    Deck
-                </div>
-                <div className="bg-white dark:bg-surface-dark border-t border-b border-slate-200 dark:border-border-dark transition-colors">
-                    <div className="p-4">
+                <div className="px-4 mt-5 space-y-5">
+                    {/* Deck Selector Card */}
+                    <div className="bg-white dark:bg-surface-dark rounded-2xl p-5 border border-slate-200 dark:border-border-dark shadow-sm">
+                        <label className="flex items-center gap-2 text-xs font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider mb-3">
+                            <span className="material-symbols-outlined text-sm">folder_open</span>
+                            Deck de Destino
+                        </label>
                         <select
                             value={selectedDeck}
                             onChange={(e) => setSelectedDeck(e.target.value)}
-                            className="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-3 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-colors"
+                            className="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-xl px-4 py-3.5 text-slate-900 dark:text-white text-sm font-medium focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-colors"
                         >
                             {decks.length === 0 ? (
                                 <option value="">Sem Decks</option>
@@ -121,69 +126,69 @@ export default function EditCardPage() {
                             )}
                         </select>
                     </div>
-                </div>
 
-                {/* Front */}
-                <div className="mt-6 px-4 py-2 text-xs font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">
-                    Front
-                </div>
-                <div className="bg-white dark:bg-surface-dark border-t border-b border-slate-200 dark:border-border-dark transition-colors">
-                    <div className="p-4">
-                        <textarea
-                            value={front}
-                            onChange={(e) => setFront(e.target.value)}
-                            placeholder="Enter the question or prompt..."
-                            rows={4}
-                            className="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-3 text-slate-900 dark:text-white text-sm placeholder:text-slate-400 dark:placeholder:text-zinc-500 focus:ring-2 focus:ring-primary focus:border-primary outline-none resize-none transition-colors"
-                        />
-                    </div>
-                </div>
+                    {/* Content Card */}
+                    <div className="bg-white dark:bg-surface-dark rounded-2xl border border-slate-200 dark:border-border-dark shadow-sm overflow-hidden flex flex-col">
+                        {/* Front */}
+                        <div className="p-5 border-b border-slate-100 dark:border-border-dark/60">
+                            <label className="flex items-center gap-2 text-xs font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider mb-3">
+                                <span className="material-symbols-outlined text-sm">visibility</span>
+                                Frente (Pergunta)
+                            </label>
+                            <textarea
+                                value={front}
+                                onChange={(e) => setFront(e.target.value)}
+                                placeholder="Digite o que deseja perguntar..."
+                                rows={3}
+                                className="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-xl px-4 py-3.5 text-slate-900 dark:text-white text-sm font-medium placeholder:text-slate-400 dark:placeholder:text-zinc-500 focus:ring-2 focus:ring-primary focus:border-primary outline-none resize-none transition-colors"
+                            />
+                        </div>
 
-                {/* Back */}
-                <div className="mt-6 px-4 py-2 text-xs font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">
-                    Back
-                </div>
-                <div className="bg-white dark:bg-surface-dark border-t border-b border-slate-200 dark:border-border-dark transition-colors">
-                    <div className="p-4">
-                        <textarea
-                            value={back}
-                            onChange={(e) => setBack(e.target.value)}
-                            placeholder="Enter the answer..."
-                            rows={4}
-                            className="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-3 text-slate-900 dark:text-white text-sm placeholder:text-slate-400 dark:placeholder:text-zinc-500 focus:ring-2 focus:ring-primary focus:border-primary outline-none resize-none transition-colors"
-                        />
+                        {/* Back */}
+                        <div className="p-5">
+                            <label className="flex items-center gap-2 text-xs font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider mb-3">
+                                <span className="material-symbols-outlined text-sm">visibility_off</span>
+                                Verso (Resposta)
+                            </label>
+                            <textarea
+                                value={back}
+                                onChange={(e) => setBack(e.target.value)}
+                                placeholder="Digite a resposta esperada..."
+                                rows={3}
+                                className="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-xl px-4 py-3.5 text-slate-900 dark:text-white text-sm font-medium placeholder:text-slate-400 dark:placeholder:text-zinc-500 focus:ring-2 focus:ring-primary focus:border-primary outline-none resize-none transition-colors"
+                            />
+                        </div>
                     </div>
-                </div>
 
-                {/* Tags */}
-                <div className="mt-6 px-4 py-2 text-xs font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">
-                    Tags
-                </div>
-                <div className="bg-white dark:bg-surface-dark border-t border-b border-slate-200 dark:border-border-dark transition-colors">
-                    <div className="p-4">
-                        <input
-                            value={tags}
-                            onChange={(e) => setTags(e.target.value)}
-                            placeholder="biology, chapter-1, exam..."
-                            className="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-3 text-slate-900 dark:text-white text-sm placeholder:text-slate-400 dark:placeholder:text-zinc-500 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-colors"
-                        />
-                    </div>
-                </div>
+                    {/* Metadata Card */}
+                    <div className="bg-white dark:bg-surface-dark rounded-2xl p-5 border border-slate-200 dark:border-border-dark shadow-sm flex flex-col gap-5">
+                        {/* Tags */}
+                        <div>
+                            <label className="flex items-center gap-2 text-xs font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider mb-3">
+                                <span className="material-symbols-outlined text-sm">sell</span>
+                                Tags (Opcional)
+                            </label>
+                            <input
+                                value={tags}
+                                onChange={(e) => setTags(e.target.value)}
+                                placeholder="Ex: biologia, capitulo-1, enem"
+                                className="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-xl px-4 py-3.5 text-slate-900 dark:text-white text-sm font-medium placeholder:text-slate-400 dark:placeholder:text-zinc-500 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-colors"
+                            />
+                        </div>
 
-                {/* Card Info */}
-                <div className="mt-6 px-4 py-2 text-xs font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">
-                    Info
-                </div>
-                <div className="bg-white dark:bg-surface-dark border-t border-b border-slate-200 dark:border-border-dark transition-colors">
-                    <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-border-dark">
-                        <span className="text-base text-slate-900 dark:text-white">Status</span>
-                        <span className="text-base text-slate-400 dark:text-zinc-400">
-                            {card.repetitions === 0 ? 'New' : card.interval < 1 ? 'Learning' : 'Review'}
-                        </span>
-                    </div>
-                    <div className="flex items-center justify-between p-4">
-                        <span className="text-base text-slate-900 dark:text-white">Card ID</span>
-                        <span className="text-sm text-slate-400 dark:text-zinc-400 font-mono">#{card.id}</span>
+                        {/* Info Readonly */}
+                        <div className="pt-4 border-t border-slate-100 dark:border-border-dark/60 flex flex-col gap-2">
+                            <div className="flex items-center justify-between text-sm">
+                                <span className="font-bold text-slate-400 dark:text-zinc-500">Status</span>
+                                <span className="font-medium text-slate-700 dark:text-zinc-300">
+                                    {card.repetitions === 0 ? 'New' : card.interval < 1 ? 'Learning' : 'Review'}
+                                </span>
+                            </div>
+                            <div className="flex items-center justify-between text-sm">
+                                <span className="font-bold text-slate-400 dark:text-zinc-500">ID</span>
+                                <span className="font-mono text-slate-400 dark:text-zinc-600">#{card.id.split('-')[0]}</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 

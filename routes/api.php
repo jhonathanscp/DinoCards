@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\SyncController;
+use App\Http\Controllers\Api\ImageUploadController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -13,6 +14,9 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
     // Offline Sync Endpoints (Limitados a 60 puxadas/empurradas por minuto por Usuário)
     Route::get('/sync/pull', [SyncController::class, 'pull']);
     Route::post('/sync/push', [SyncController::class, 'push']);
+
+    // Media Upload
+    Route::post('/upload', [ImageUploadController::class, 'store']);
 
     // Review Endpoint (SM-2 SRS)
     Route::post('/flashcards/{flashcard}/review', [ReviewController::class, 'store']);

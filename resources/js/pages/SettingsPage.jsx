@@ -13,6 +13,7 @@ export default function SettingsPage() {
     const [syncMessage, setSyncMessage] = useState('')
     const [lastSyncStr, setLastSyncStr] = useState('Never synced')
     const [isImporting, setIsImporting] = useState(false)
+    const [ttsLang, setTtsLang] = useState(localStorage.getItem('tts_lang') || 'en-US')
 
     useEffect(() => {
         const fetchMeta = async () => {
@@ -181,6 +182,27 @@ export default function SettingsPage() {
                         <div className="flex items-center text-slate-400 dark:text-zinc-500">
                             <span className="text-base mr-1">FSRS v4</span>
                             <span className="material-symbols-outlined text-xl">chevron_right</span>
+                        </div>
+                    </div>
+                    <div className="flex items-center justify-between p-4 cursor-pointer active:bg-slate-50 dark:active:bg-zinc-800 transition-colors">
+                        <span className="text-base text-slate-900 dark:text-white">Idioma do Áudio (TTS)</span>
+                        <div className="flex items-center text-slate-400 dark:text-zinc-500">
+                            <select 
+                                value={ttsLang} 
+                                onChange={(e) => {
+                                    setTtsLang(e.target.value)
+                                    localStorage.setItem('tts_lang', e.target.value)
+                                }} 
+                                className="bg-transparent text-base focus:outline-none appearance-none text-right pr-2 font-medium"
+                            >
+                                <option value="en-US">Inglês (US)</option>
+                                <option value="pt-BR">Português (BR)</option>
+                                <option value="es-ES">Espanhol (ES)</option>
+                                <option value="fr-FR">Francês (FR)</option>
+                                <option value="de-DE">Alemão (DE)</option>
+                                <option value="ja-JP">Japonês (JP)</option>
+                            </select>
+                            <span className="material-symbols-outlined text-xl">edit</span>
                         </div>
                     </div>
                 </div>

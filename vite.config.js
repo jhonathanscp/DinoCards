@@ -18,7 +18,26 @@ export default defineConfig({
             devOptions: {
                 enabled: true,
             },
-            manifest: false
+            manifest: false,
+            workbox: {
+                globPatterns: ['**/*.{js,css,html,ico,png,svg,webp}'],
+                runtimeCaching: [
+                    {
+                        urlPattern: ({ url }) => url.pathname.startsWith('/storage/'),
+                        handler: 'CacheFirst',
+                        options: {
+                            cacheName: 'flashcard-images-cache',
+                            expiration: {
+                                maxEntries: 500,
+                                maxAgeSeconds: 60 * 60 * 24 * 30, // 30 Days
+                            },
+                            cacheableResponse: {
+                                statuses: [0, 200]
+                            }
+                        }
+                    }
+                ]
+            }
         }),
     ],
     server: {

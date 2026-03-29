@@ -46,6 +46,21 @@ export default function BrowsePage() {
         return 'Review'
     }
 
+    const isLeech = (card) => {
+        // Assume leech se possuir multiplas tentativas e Ease Factor crítico (< 1.8)
+        return card.repetitions > 3 && (card.ease_factor && card.ease_factor < 1.8)
+    }
+
+    const speak = (e, text) => {
+        e.stopPropagation()
+        if ('speechSynthesis' in window && text) {
+            window.speechSynthesis.cancel()
+            const utterance = new SpeechSynthesisUtterance(text)
+            utterance.lang = localStorage.getItem('tts_lang') || 'en-US'
+            window.speechSynthesis.speak(utterance)
+        }
+    }
+
     const filteredCards = flashcards.filter((card) => {
         const subject = subjectsMap[card.subject_id]
         const subjectName = subject ? subject.name : 'No Deck'
@@ -220,10 +235,23 @@ export default function BrowsePage() {
                                                 </span>
                                             </div>
                                             <span className={`text-xs font-medium ${statusColor}`}>• {status}</span>
+                                            {isLeech(card) && (
+                                                <span className="text-[10px] font-bold text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/30 px-1.5 py-0.5 rounded ml-1 animate-pulse">
+                                                    ⚠️ Sanguessuga
+                                                </span>
+                                            )}
                                         </div>
                                     </div>
-                                    <div className="text-slate-400 dark:text-zinc-500 opacity-50 group-hover:opacity-100 transition-opacity">
-                                        <span className="material-symbols-outlined text-xl">chevron_right</span>
+                                    <div className="flex items-center gap-2">
+                                        <button 
+                                            onClick={(e) => speak(e, card.front)}
+                                            className="p-1.5 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-full transition-colors text-slate-400 dark:text-zinc-500"
+                                        >
+                                            <span className="material-symbols-outlined text-[18px]">volume_up</span>
+                                        </button>
+                                        <div className="text-slate-400 dark:text-zinc-500 opacity-50 group-hover:opacity-100 transition-opacity ml-1">
+                                            <span className="material-symbols-outlined text-xl">chevron_right</span>
+                                        </div>
                                     </div>
                                 </div>
                             )

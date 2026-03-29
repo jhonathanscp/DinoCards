@@ -1,4 +1,4 @@
-# FlashCardApp 🧠
+# DinoCards 🦖
 
 Um aplicativo completo de Flashcards focado no aprendizado eficiente através da técnica de **Repetição Espaçada** (Spaced Repetition). Desenvolvido para funcionar em múltiplos ambientes, ele permite que você estude offline e sincronize seu progresso com a nuvem quando estiver conectado.
 

@@ -11,6 +11,23 @@ import {
 } from './localDb';
 
 /**
+ * Converts a base64 DataURL to a File object
+ */
+function dataURLtoFile(dataurl, filename) {
+    const arr = dataurl.split(',');
+    const mimeMatch = arr[0].match(/:(.*?);/);
+    if (!mimeMatch) return null;
+    const mime = mimeMatch[1];
+    const bstr = atob(arr[arr.length - 1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) {
+        u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new File([u8arr], filename, { type: mime });
+}
+
+/**
  * Pushes local changes (where is_synced === false) to the backend.
  * This includes created, updated, and soft-deleted items.
  */
@@ -27,6 +44,34 @@ export const pushToServer = async () => {
 
         if (unSyncedSubjects.length === 0 && unSyncedFlashcards.length === 0 && unSyncedReviewLogs.length === 0) {
             return; // Nothing to push
+        }
+
+        // ===================================
+        // PRE-SYNC: Upload Base64 Images
+        // ===================================
+        for (let card of unSyncedFlashcards) {
+            // Front Image Upload
+            if (card.front_image && card.front_image.startsWith('data:image')) {
+                const file = dataURLtoFile(card.front_image, `front_${card.id}.webp`);
+                if (file) {
+                    const formData = new FormData();
+                    formData.append('image', file);
+                    const res = await axios.post('/api/upload', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+                    card.front_image = res.data.image_url;
+                    await saveRawFlashcard(card); // Save the URL locally so it's not repeatedly uploaded
+                }
+            }
+            // Back Image Upload
+            if (card.back_image && card.back_image.startsWith('data:image')) {
+                const file = dataURLtoFile(card.back_image, `back_${card.id}.webp`);
+                if (file) {
+                    const formData = new FormData();
+                    formData.append('image', file);
+                    const res = await axios.post('/api/upload', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+                    card.back_image = res.data.image_url;
+                    await saveRawFlashcard(card);
+                }
+            }
         }
 
         const payload = {

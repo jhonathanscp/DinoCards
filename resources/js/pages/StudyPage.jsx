@@ -55,6 +55,16 @@ export default function StudyPage() {
         }
     }
 
+    const speak = (e, text) => {
+        e.stopPropagation()
+        if ('speechSynthesis' in window && text) {
+            window.speechSynthesis.cancel() // Stop previous speaking
+            const utterance = new SpeechSynthesisUtterance(text)
+            utterance.lang = localStorage.getItem('tts_lang') || 'en-US'
+            window.speechSynthesis.speak(utterance)
+        }
+    }
+
     if (loading) {
         return (
             <div className="bg-slate-50 dark:bg-zinc-950 min-h-screen flex items-center justify-center p-6 transition-colors">
@@ -118,8 +128,13 @@ export default function StudyPage() {
                     className="w-full max-w-sm aspect-[4/3] bg-white dark:bg-zinc-900 rounded-2xl shadow-xl border border-slate-200 dark:border-zinc-800 flex flex-col p-6 relative cursor-pointer hover:border-slate-300 dark:hover:border-zinc-700 transition-colors active:scale-[0.98]"
                 >
                     <div className="flex justify-between items-start text-xs text-slate-400 dark:text-zinc-400 mb-4">
-                        <span>Ease: {card?.ease_factor || 2.5}</span>
-                        <button className="p-1 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-full transition-colors"
+                        <button className="p-2 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-full transition-colors"
+                            onClick={(e) => speak(e, showAnswer ? card?.back : card?.front)}
+                            title="Ouvir"
+                        >
+                            <span className="material-icons text-sm">volume_up</span>
+                        </button>
+                        <button className="p-2 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-full transition-colors"
                             onClick={(e) => {
                                 e.stopPropagation()
                                 navigate(`/card/${card?.id}/edit`, { state: { card } })
@@ -128,7 +143,13 @@ export default function StudyPage() {
                             <span className="material-icons text-sm">edit</span>
                         </button>
                     </div>
-                    <div className="flex-1 flex items-center justify-center text-center">
+                    <div className="flex-1 flex flex-col items-center justify-center text-center w-full">
+                        {showAnswer && card?.back_image && (
+                            <img src={card.back_image} className="max-h-[140px] rounded-lg mb-4 object-contain" alt="back" />
+                        )}
+                        {!showAnswer && card?.front_image && (
+                            <img src={card.front_image} className="max-h-[140px] rounded-lg mb-4 object-contain" alt="front" />
+                        )}
                         <p className={`font-semibold ${showAnswer ? 'text-2xl text-card-due' : 'text-3xl'}`}>
                             {showAnswer ? card?.back : card?.front}
                         </p>
