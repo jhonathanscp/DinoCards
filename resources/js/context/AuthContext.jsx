@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import axios from '../lib/axios';
+import { clearDatabase, getActiveUserId, setActiveUserId } from '../services/localDb';
 
 const AuthContext = createContext();
 
@@ -13,6 +14,14 @@ export const AuthProvider = ({ children }) => {
     const checkAuthStatus = async () => {
         try {
             const { data } = await axios.get('/api/user');
+            
+            // Segurança Offline-first: Se mudou de utilizador sem logout limpo, precisamos esvaziar o DB pra evitar vazamento
+            const storedUserId = await getActiveUserId();
+            if (storedUserId && storedUserId !== data.id) {
+                await clearDatabase();
+            }
+            await setActiveUserId(data.id);
+            
             setUser(data);
         } catch (error) {
             setUser(null);
@@ -42,9 +51,14 @@ export const AuthProvider = ({ children }) => {
     };
 
     const logout = async () => {
-        await axios.post('/logout');
+        try {
+            await axios.post('/logout');
+        } catch (error) {
+            console.error('Logout request failed', error);
+        }
         setUser(null);
         setSyncCompleted(false);
+        await clearDatabase(); // Previne que dados fiquem no IndexedDB para o próximo usuário
     };
 
     return (

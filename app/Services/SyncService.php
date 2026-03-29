@@ -46,9 +46,29 @@ class SyncService implements SyncServiceInterface
 
     public function push(User $user, array $subjects, array $flashcards, array $reviewLogs): void
     {
+        // Extrair todos os IDs do payload de forma otimizada para verificação (Prevenção de IDOR)
+        $subjectIds = array_filter(array_column($subjects, 'id'));
+        $flashcardIds = array_filter(array_column($flashcards, 'id'));
+        
+        // Carrega registros existentes que batem com esses IDs e valida Ownership (IDOR Defense)
+        $existingSubjects = Subject::whereIn('id', $subjectIds)->get()->keyBy('id');
+        $existingFlashcards = Flashcard::whereIn('id', $flashcardIds)->get()->keyBy('id');
+
         DB::beginTransaction();
 
         try {
+            // Guard: Verificar Propriedade (Ownership) -> Se existir no banco, MAS for de outro usuário, rejeita transação
+            foreach ($subjects as $subjectData) {
+                if (isset($existingSubjects[$subjectData['id']]) && $existingSubjects[$subjectData['id']]->user_id !== $user->id) {
+                    throw new \Exception("Unauthorized: Access denied for Subject ID {$subjectData['id']}.");
+                }
+            }
+            foreach ($flashcards as $flashcardData) {
+                if (isset($existingFlashcards[$flashcardData['id']]) && $existingFlashcards[$flashcardData['id']]->user_id !== $user->id) {
+                    throw new \Exception("Unauthorized: Access denied for Flashcard ID {$flashcardData['id']}.");
+                }
+            }
+
             // Processa Subjects
             foreach ($subjects as $subjectData) {
                 if (!empty($subjectData['deleted_at'])) {
@@ -56,6 +76,17 @@ class SyncService implements SyncServiceInterface
                         ->where('user_id', $user->id)
                         ->delete(); // SoftDelete local
                 } else {
+                    // Validar Existência Parent ID para evitar vinculação fantasma ou em pastas de outros users
+                    $parentId = $subjectData['parent_id'] ?? null;
+                    if ($parentId) {
+                        // Verifica se pai existe NO BANCO do usuario ou SE ESTÁ SENDO CRIADO NESTE PAYLOAD
+                        $parentExistsInDb = Subject::where('id', $parentId)->where('user_id', $user->id)->exists();
+                        $parentIsInPayload = in_array($parentId, $subjectIds);
+                        if (!$parentExistsInDb && !$parentIsInPayload) {
+                            throw new \Exception("Constraint Violation: Parent Subject {$parentId} is invalid or unauthorized.");
+                        }
+                    }
+
                     Subject::updateOrCreate(
                         ['id' => $subjectData['id'], 'user_id' => $user->id],
                         [
@@ -76,6 +107,14 @@ class SyncService implements SyncServiceInterface
                         ->where('user_id', $user->id)
                         ->delete(); // SoftDelete local
                 } else {
+                    $subjectId = $flashcardData['subject_id'];
+                    $subjectExistsInDb = Subject::where('id', $subjectId)->where('user_id', $user->id)->exists();
+                    $subjectIsInPayload = in_array($subjectId, $subjectIds);
+                    
+                    if (!$subjectExistsInDb && !$subjectIsInPayload) {
+                         throw new \Exception("Constraint Violation: Subject {$subjectId} for flashcard is invalid or unauthorized.");
+                    }
+
                     Flashcard::updateOrCreate(
                         ['id' => $flashcardData['id'], 'user_id' => $user->id],
                         [
@@ -95,12 +134,27 @@ class SyncService implements SyncServiceInterface
             }
 
             // Processa ReviewLogs e executa o algoritmo SM-2 para cada um
+            $reviewLogIds = array_filter(array_column($reviewLogs, 'id'));
+            $existingReviewLogs = ReviewLog::whereIn('id', $reviewLogIds)->get()->keyBy('id');
+
             foreach ($reviewLogs as $logData) {
+                if (isset($existingReviewLogs[$logData['id']]) && $existingReviewLogs[$logData['id']]->user_id !== $user->id) {
+                    throw new \Exception("Unauthorized: Access denied for ReviewLog ID {$logData['id']}.");
+                }
+
                 if (!empty($logData['deleted_at'])) {
                     ReviewLog::where('id', $logData['id'])
                         ->where('user_id', $user->id)
                         ->delete(); // SoftDelete local
                 } else {
+                    $logFlashcardId = $logData['flashcard_id'];
+                    $flashcardExistsInDb = Flashcard::where('id', $logFlashcardId)->where('user_id', $user->id)->exists();
+                    $flashcardIsInPayload = in_array($logFlashcardId, $flashcardIds);
+                    
+                    if (!$flashcardExistsInDb && !$flashcardIsInPayload) {
+                         throw new \Exception("Constraint Violation: Flashcard {$logFlashcardId} for review log is invalid or unauthorized.");
+                    }
+
                     $log = ReviewLog::updateOrCreate(
                         ['id' => $logData['id'], 'user_id' => $user->id],
                         [

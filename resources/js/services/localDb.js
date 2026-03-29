@@ -247,3 +247,18 @@ export const saveRawReviewLog = async (log) => await reviewLogsStore.setItem(log
 
 export const getSyncMetadata = async (key) => await metaStore.getItem(key);
 export const saveSyncMetadata = async (key, value) => await metaStore.setItem(key, value);
+
+export const getActiveUserId = async () => await metaStore.getItem('active_user_id');
+export const setActiveUserId = async (id) => await metaStore.setItem('active_user_id', id);
+
+// ============================================
+// Auth Helpers
+// ============================================
+
+export const clearDatabase = async () => {
+    await subjectsStore.clear();
+    await flashcardsStore.clear();
+    await metaStore.clear();
+    await reviewLogsStore.clear();
+    triggerLocalDbChanged();
+};
