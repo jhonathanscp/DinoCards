@@ -1,6 +1,6 @@
 {
-  "name": "FlashCardApp",
-  "short_name": "FlashCardApp",
+  "name": "DinoCards",
+  "short_name": "DinoCards",
   "description": "Estude com repetição espaçada",
   "id": "/",
   "start_url": "/",

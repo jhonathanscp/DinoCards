@@ -51,7 +51,7 @@ export default function AuthPage() {
     }
 
     const handleGoogleSignIn = () => {
-        navigate('/')
+        window.location.href = '/auth/google'
     }
 
     return (
@@ -64,10 +64,10 @@ export default function AuthPage() {
             <div className="flex-1 flex flex-col items-center justify-center px-6 py-12 relative z-10">
                 {/* Logo / Brand */}
                 <div className="mb-10 text-center">
-                    <div className="w-16 h-16 bg-primary/15 border border-primary/30 rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg shadow-primary/10">
-                        <span className="material-icons text-primary text-3xl">style</span>
+                    <div className="w-40 h-40 overflow-hidden flex items-center justify-center mx-auto mb-5">
+                        <img src="/icons/logo_authscreen.png" alt="DinoCards Logo" className="w-full h-full object-cover p-2" />
                     </div>
-                    <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">FlashCardApp</h1>
+                    <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">DinoCards</h1>
                     <p className="text-slate-500 dark:text-zinc-400 text-sm mt-2">
                         {isLogin ? 'Welcome back! Sign in to continue.' : 'Create your account to get started.'}
                     </p>

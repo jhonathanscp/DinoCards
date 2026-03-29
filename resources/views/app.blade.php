@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="FlashCardApp — Estude com repetição espaçada">
-    <title>FlashCardApp</title>
+    <meta name="description" content="DinoCards — Estude com repetição espaçada">
+    <title>DinoCards</title>
 
     {{-- Google Fonts --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,6 +20,7 @@
     {{-- PWA Manifest & Theme --}}
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#09090b">
+    <link rel="icon" type="image/png" href="/icons/logo.png">
     <link rel="apple-touch-icon" href="/icons/logo.png">
 
     {{-- Vite Assets --}}

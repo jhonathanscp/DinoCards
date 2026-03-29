@@ -1,9 +1,9 @@
 <?php
 
-declare(strict_types = 1)
-;
+declare(strict_types = 1);
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\SocialAuthController;
 use Illuminate\Support\Facades\Route;
 
 /* |-------------------------------------------------------------------------- | Auth Routes (Sanctum SPA — cookie-based) |-------------------------------------------------------------------------- | These routes MUST be defined before the SPA catch-all so they are not | intercepted by the React frontend fallback. */
@@ -14,6 +14,11 @@ Route::middleware(['throttle:5,1'])->group(function () {
 });
 
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
+
+/* |-------------------------------------------------------------------------- | Social OAuth Routes |-------------------------------------------------------------------------- */
+
+Route::get('/auth/google', [SocialAuthController::class, 'redirect']);
+Route::get('/auth/google/callback', [SocialAuthController::class, 'callback']);
 
 /* |-------------------------------------------------------------------------- | SPA Catch-All (React Router) |-------------------------------------------------------------------------- | Any URL that doesn't match a previous route will be served by the | Blade view that loads Vite + React. */
 
