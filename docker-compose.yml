@@ -15,6 +15,8 @@ services:
     build: .
     volumes:
       - .:/var/www/html
+      - /var/www/html/vendor # Isso diz: "use a vendor interna da imagem, não a do host"
+      - /var/www/html/node_modules
     depends_on:
       - db
 

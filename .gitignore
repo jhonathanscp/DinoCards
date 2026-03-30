@@ -23,7 +23,6 @@ Homestead.json
 Homestead.yaml
 Thumbs.db
 /.agents
-composer.lock
 package-lock.json
 /dist
 /dist-electron
