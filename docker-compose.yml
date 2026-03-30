@@ -1,0 +1,32 @@
+services:
+  # 1. Servidor Web (Nginx)
+  web:
+    image: nginx:alpine
+    ports:
+      - "80:80" 
+    volumes:
+      - .:/var/www/html 
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf 
+    depends_on:
+      - app
+
+  # 2. O aplicativo Laravel (FPM)
+  app:
+    build: .
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      - db
+
+  # 3. O Banco de Dados (Postgres)
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: dinocards_db
+      POSTGRES_USER: dinocards_user
+      POSTGRES_PASSWORD: secret_password
+    volumes:
+      - dinocards_data:/var/lib/postgresql/data
+
+volumes:
+  dinocards_data:

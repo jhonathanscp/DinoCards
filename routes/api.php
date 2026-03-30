@@ -15,8 +15,9 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
     Route::get('/sync/pull', [SyncController::class, 'pull']);
     Route::post('/sync/push', [SyncController::class, 'push']);
 
-    // Media Upload
+    // Media Upload & Secure Display
     Route::post('/upload', [ImageUploadController::class, 'store']);
+    Route::get('/images/{filename}', [ImageUploadController::class, 'show']);
 
     // Review Endpoint (SM-2 SRS)
     Route::post('/flashcards/{flashcard}/review', [ReviewController::class, 'store']);
