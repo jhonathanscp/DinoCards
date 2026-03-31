@@ -127,9 +127,9 @@ export default function SettingsPage() {
     }
 
     return (
-        <>
+        <div className="flex flex-col min-h-full max-w-md md:max-w-4xl mx-auto w-full md:px-8">
             {/* Header */}
-            <header className="flex items-center p-4 pb-2 justify-between sticky top-0 bg-slate-100/80 dark:bg-background-dark/80 backdrop-blur-md z-10 border-b border-slate-200 dark:border-primary/10 transition-colors">
+            <header className="flex items-center p-4 md:pt-8 pb-2 justify-between sticky top-0 bg-slate-100/80 md:bg-transparent dark:bg-background-dark/80 backdrop-blur-md z-10 border-b border-slate-200 dark:border-primary/10 transition-colors">
                 <button className="flex size-12 shrink-0 items-center justify-center text-slate-500 dark:text-zinc-300 hover:text-primary transition-colors" onClick={() => navigate('/')}>
                     <span className="material-symbols-outlined text-2xl">arrow_back</span>
                 </button>
@@ -138,7 +138,7 @@ export default function SettingsPage() {
                 </h2>
             </header>
 
-            <main className="flex-1 overflow-y-auto pb-6 max-w-md mx-auto w-full">
+            <main className="flex-1 pb-6 w-full">
                 {/* Account Section */}
                 <div className="mt-6 px-4 py-2 text-xs font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">
                     Account
@@ -280,6 +280,6 @@ export default function SettingsPage() {
                     </button>
                 </div>
             </main>
-        </>
+        </div>
     )
 }

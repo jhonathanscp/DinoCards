@@ -129,9 +129,9 @@ export default function BrowsePage() {
     }
 
     return (
-        <div className="flex flex-col min-h-full max-w-md mx-auto w-full">
+        <div className="flex flex-col min-h-full max-w-md md:max-w-6xl mx-auto w-full md:px-8">
             {/* Header */}
-            <header className="flex items-center p-4 pb-2 justify-between sticky top-0 bg-slate-100/80 dark:bg-background-dark/80 backdrop-blur-md z-10 border-b border-slate-200 dark:border-primary/10 transition-colors">
+            <header className="flex items-center p-4 md:pt-8 pb-2 justify-between sticky top-0 bg-slate-100/80 md:bg-transparent dark:bg-background-dark/80 backdrop-blur-md z-10 border-b border-slate-200 dark:border-primary/10 transition-colors">
                 <button className="flex size-12 shrink-0 items-center justify-center text-slate-500 dark:text-zinc-300 hover:text-primary transition-colors" onClick={() => navigate('/')}>
                     <span className="material-symbols-outlined text-2xl">arrow_back</span>
                 </button>
@@ -282,7 +282,7 @@ export default function BrowsePage() {
             </div>
             {/* Bulk Action Bar */}
             {isSelectionMode && (
-                <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white dark:bg-surface-dark border-t border-slate-200 dark:border-border-dark p-4 shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.1)] z-20 flex items-center justify-between animate-[slideUp_0.2s_ease-out]">
+                <div className="fixed bottom-0 left-0 right-0 max-w-md md:max-w-6xl mx-auto bg-white dark:bg-surface-dark border-t border-slate-200 dark:border-border-dark p-4 shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.1)] z-20 flex items-center justify-between animate-[slideUp_0.2s_ease-out]">
                     <span className="text-sm font-medium text-slate-700 dark:text-zinc-200">{selectedCardIds.size} selecionados</span>
                     <div className="flex gap-2">
                         <button onClick={() => setShowMoveModal(true)} disabled={selectedCardIds.size === 0} className="px-4 py-2 text-sm font-semibold text-slate-700 dark:text-zinc-200 bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 rounded-lg disabled:opacity-50 transition-colors">

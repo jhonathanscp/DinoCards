@@ -12,6 +12,8 @@ if [ ! -f .env ]; then
     cp .env.example .env
 fi
 
+npm run build
+
 # 4. Comandos do Laravel
 php artisan key:generate --no-interaction --force
 php artisan migrate --force

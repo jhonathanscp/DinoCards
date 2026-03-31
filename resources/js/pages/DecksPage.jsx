@@ -318,8 +318,8 @@ export default function DecksPage() {
 
     return (
         <>
-            <header className="bg-slate-100 dark:bg-background-dark pt-14 pb-4 px-4 sticky top-0 z-10 transition-colors">
-                <div className="max-w-md mx-auto flex items-center justify-between">
+            <header className="bg-slate-50 md:bg-transparent dark:bg-background-dark pt-14 md:pt-8 pb-4 px-4 md:px-8 sticky top-0 z-10 transition-colors">
+                <div className="max-w-md md:max-w-6xl mx-auto flex items-center justify-between">
                     <h1 className="text-3xl font-bold tracking-tight">Decks</h1>
                     <div className="flex items-center gap-2">
                         <button
@@ -341,14 +341,14 @@ export default function DecksPage() {
                     </div>
                 </div>
             </header>
-            <main className="px-4">
+            <main className="px-4 md:px-8">
                 {/* Sync Message Toast */}
                 {syncMessage && (
-                    <div className="max-w-md mx-auto mb-4 px-4 py-3 bg-card-learning/20 border border-card-learning/30 rounded-xl text-card-learning text-sm font-medium text-center animate-pulse">
+                    <div className="max-w-md md:max-w-6xl mx-auto mb-4 px-4 py-3 bg-card-learning/20 border border-card-learning/30 rounded-xl text-card-learning text-sm font-medium text-center animate-pulse">
                         {syncMessage}
                     </div>
                 )}
-                <div className="max-w-md mx-auto space-y-4">
+                <div className="max-w-md md:max-w-6xl mx-auto space-y-4">
                     {/* Column Headers */}
                     <div className="flex px-4 py-2 text-xs font-semibold text-slate-400 dark:text-text-muted-dark border-b border-slate-200 dark:border-border-dark">
                         <div className="flex-1">Deck</div>

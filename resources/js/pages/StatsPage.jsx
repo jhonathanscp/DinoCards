@@ -149,9 +149,9 @@ export default function StatsPage() {
     }
 
     return (
-        <div className="flex flex-col max-w-md mx-auto w-full pb-24">
+        <div className="flex flex-col max-w-md md:max-w-6xl mx-auto w-full pb-24 md:pb-8 md:px-8 md:pt-2">
             {/* Header */}
-            <header className="flex items-center p-4 pb-2 justify-between sticky top-0 bg-slate-100/80 dark:bg-background-dark/80 backdrop-blur-md z-10 border-b border-slate-200 dark:border-primary/10 transition-colors">
+            <header className="flex items-center p-4 pb-2 justify-between sticky top-0 bg-slate-100/80 md:bg-transparent dark:bg-background-dark/80 backdrop-blur-md z-10 border-b border-slate-200 dark:border-primary/10 transition-colors">
                 <button className="flex size-12 shrink-0 items-center justify-center text-slate-500 dark:text-zinc-300 hover:text-primary transition-colors" onClick={() => window.history.back()}>
                     <span className="material-symbols-outlined text-2xl">arrow_back</span>
                 </button>
